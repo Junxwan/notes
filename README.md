@@ -1,6 +1,6 @@
 # Golang 筆記
 
-### package name 
+## package name 
 
 正確 應該小寫
 
@@ -18,7 +18,7 @@
 
     package httputils
 
-### import 
+## import 
 
 不要使用相對路徑
   
@@ -28,7 +28,7 @@
 
     import “github.com/name/project/src/net”  
 
-### func 命名採用駝峰式
+## func 命名採用駝峰式
     
 可公開在其他package下使用命名開頭大寫
 
@@ -38,7 +38,7 @@
 
     fmt.fmtString()
 
-### 變數
+## 變數
 
 全域公開變數 駝峰式
 
@@ -82,13 +82,13 @@ func 參數 小駝峰式
 
     UrlPathInfo應該寫成URLPathInfo或urlPathInfo
     
-### const
+## const
 
 全大寫以"_"做區隔
 
     APP_URL
 
-### if 
+## if 
     
 initialization以簡短變量聲明
 
@@ -96,7 +96,7 @@ initialization以簡短變量聲明
         ........  
     }
 
-### for 
+## for 
     
 initialization以簡短變量聲明
 
@@ -110,7 +110,7 @@ initialization以簡短變量聲明
         .....
     }
     
-### String
+## String
     
 盡量不要使用+串接字串
 
