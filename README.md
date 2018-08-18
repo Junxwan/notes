@@ -119,10 +119,58 @@ func 開頭大寫與小寫應該分類，大寫放上，小寫放下
     
 ## const
 
-全大寫以"_"做區隔
+編譯後不可在執行過程中更改
 
-    APP_URL
+    const pi = 3.14159
+    
+可以多組
+    
+    const (
+        e  = 2.71828182845904523536028747135266249775724709369995957496696763
+        pi = 3.14159265358979323846264338327950288419716939937510582097494459
+    )
 
+宣告可以包含一個類別或值
+
+    const noDelay time.Duration = 0
+    
+    fmt.Printf(noDelay)  // 0s
+    
+    0s是因為 time package內的func String()自動加上
+
+省略初始值，沒有宣告則往上早有宣告的變數值
+
+    const (
+        a = 1
+        b
+        c = 2
+        d
+    )
+    
+    fmt.Println(a, b, c, d) // "1 1 2 2"
+    
+## iota
+
+iota初始值為零並根據"="右方表達式做遞增
+
+    type Weekday int
+    
+    const (
+        Sunday Weekday = iota   // 0
+        Monday                  // 1
+        Tuesday                 // 2
+    )
+    
+iota做計算規則
+
+    type Flags uint
+    
+    const (
+        FlagUp Flags = 1 << iota // 1
+        FlagBroadcast            // 2
+        FlagLoopback             // 4
+    )
+    
 ## if 
     
 initialization以簡短變量聲明
@@ -209,4 +257,35 @@ type 開頭大寫與小寫應該分類，大寫放上，小寫放下
         test := map[string]interface{}{}
         test["Title"] = "1"
         test["Body"] = 2
+    }
+    
+## Array
+
+宣告一個長度三，類型為int，初始值都是0
+
+    var a [3]int    
+    
+給定初始值
+
+    var a [3]int = [3]int{1, 2, 3}
+    
+初始10個值，最後一個為-1
+
+    var a = [...]int{10: -1}
+    
+自動計算長度
+
+    var a  = [...]int{1, 2, 3, 4}
+
+長度在編譯後就已固定，不可在執行過程中做更改長度    
+
+    var a [3]int    
+    
+array應用場景在於長度固定不變，如sha256，一般建議用slice
+    
+    import "crypto/sha256"
+    
+    func main() {
+        c1 := sha256.Sum256([]byte("x"))
+        fmt.Printf("%x\n%x\n%t\n%T\n", c1, c2, c1 == c2, c1)
     }
