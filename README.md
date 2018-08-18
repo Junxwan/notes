@@ -13,6 +13,8 @@
 * [string](#string)
 * [array](#array)
 * [slice](#slice)
+* [map](#map)
+* [struct](#struct)
 
 ## package name 
 
@@ -363,4 +365,175 @@ Slice不能互相比較，Array可以互相比較
     fmt.Println(c == d) // true
     fmt.Println(a == nil) // Slice只能跟nil比較 false
 
-> Slice比較只有bytes.Equal可用，不然就只能自己實現，要判斷是否為空最好用len(s) == 0
+Slice判斷空值
+
+    len(s) == 0    
+
+> Slice比較只有bytes.Equal可用，不然就只能自己實現，可跟nil判斷
+
+## map
+    
+> 每次遍歷順序都是隨機
+    
+建立map，key為string type，value為int type
+
+    ages := map[string]int{
+        "alice":   31,
+        "charlie": 34,
+    }
+    
+    or
+    
+    ages := make(map[string]int)
+    ages["alice"] = 31
+    ages["charlie"] = 34
+    
+delete key，失敗回傳0
+
+    delete(ages, "alice") 
+
+判斷空值
+
+    var ages map[string]int
+    fmt.Println(ages == nil)    // "true"
+    fmt.Println(len(ages) == 0) // "true"
+    
+判斷key是否存在
+    
+    ages := make(map[string]int)
+    
+    if _, ok := ages["bob"]; ok {
+        fmt.Print(true)
+    } else {
+        fmt.Print(false)
+    }
+    
+value也可以是字符串集合等
+
+     a := make(map[string]map[string]bool)
+    
+> map不能互相比較只能自己實現，可跟nil判斷
+
+## struct
+
+建立一個文章結構並有相關屬性
+
+    type Article struct {
+        ID        int
+        Name      string
+        Title     string
+        Context   string  
+    }
+
+相臨同樣類型可以並行
+
+    type Article struct {
+    	ID                   int
+    	Name, Title, Context string
+    }
+
+放入相同結構
+
+    type tree struct {
+        value       int
+        left, right *tree
+    }
+
+宣告一個變數為Article結構
+
+    var news Article
+
+操作  
+
+    news.Title = "test"
+    
+設定結構屬性值，需按照順序與對應類型設定(不要使用可以對外開放的結構)
+
+    type Point struct {
+    	X, Y int
+    }
+    
+    p := Point{1, 2}
+    
+設定結構屬性值以Name做設定，不需照順序設定，沒設定則採用默認(0)
+
+    type Point struct {
+    	X, Y int
+    }
+        
+    p := Point{X: 1, Y: 2}
+
+不可以混著使用
+
+    type Point struct {
+        X, Y int
+    }
+    
+    a := Point{1, 2}
+    b := Point{X: 1, Y: 2}
+    
+傳遞參數(用指標可以節省內存，因為操作同樣底層不用重新分配內存)
+    
+    func Scale(p *Point, factor int) *Point {
+    	p.X *= factor
+    	p.Y *= factor
+    	return p
+    }
+
+屬性與struct比較
+
+    type Point struct {
+    	X, Y int
+    }
+    
+    func main() {
+    	p := Point{1, 2}
+    	q := Point{1, 1}
+    	fmt.Println(p.X == q.X) // "true"
+    	fmt.Println(p.Y == q.Y) // "false"
+    	fmt.Println(p == q)     // "false"
+    }
+    
+屬性指定別的struct
+
+    type Point struct {
+        X, Y int
+    }
+    
+    type Wheel struct {
+        Point Point
+        Spokes int
+    }
+    
+    func main() {
+        var w Wheel
+    
+        w.Point.X = 8
+        w.Point.Y = 8
+        w.Spokes = 20
+    }
+    
+屬性不需指定完整路徑，屬性在結構上省略類型
+
+    type Point struct {
+        X, Y int
+    }
+    
+    type Circle struct {
+        Point
+        Radius int
+    }
+    
+    type Wheel struct {
+        Circle
+        Spokes int
+    }
+    
+    func main() {
+        var w Wheel
+    
+        w.X = 8
+        w.Y = 8
+        w.Radius = 5
+        w.Spokes = 20
+    }
