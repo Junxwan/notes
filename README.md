@@ -292,7 +292,7 @@ array應用場景在於長度固定不變，如sha256，一般建議用slice
 
 ## Slice
 
-一組Array
+一組Slice
 
     months := []string{1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
     
@@ -349,6 +349,4 @@ Slice不能互相比較，Array可以互相比較
     fmt.Println(c == d) // true
     fmt.Println(a == nil) // Slice只能跟nil比較 false
 
-```
-Slice比較只有bytes.Equal可用，不然就只能自己實現，要判斷是否為空最好用len(s) == 0
-```
+> Slice比較只有bytes.Equal可用，不然就只能自己實現，要判斷是否為空最好用len(s) == 0
