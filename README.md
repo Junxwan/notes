@@ -289,3 +289,66 @@ array應用場景在於長度固定不變，如sha256，一般建議用slice
         c1 := sha256.Sum256([]byte("x"))
         fmt.Printf("%x\n%x\n%t\n%T\n", c1, c2, c1 == c2, c1)
     }
+
+## Slice
+
+一組Array
+
+    months := []string{1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
+    
+選擇某範圍的index
+
+    fmt.Print(months[1:3]) // B,C
+
+選擇起始index到最後
+    
+    fmt.Print(months[2:]) // C,D,E
+    
+選擇全部
+    
+    fmt.Println(months[:]) // A,B,C,D,E
+    fmt.Println(months)    // A,B,C,D,E
+
+只選擇到最後某個index
+
+    fmt.Print(months[:2]) // A,B
+
+Slice cap(容量)，如下slice取的範圍為index:1到index3，值為B,C，所以長度為2
+但cap為4，cap計算的基準為起始index到該array最後一筆index，不看slice切片的最後範圍
+    
+    s := months[1:3] // B,C
+    
+    // 由於cap為4但要取20則超出cap容量上限，所以error
+    fmt.Println(s[:20])     
+    
+    // 雖然切片出來的值只有B,C但指定取出第一筆到第四筆，此時會自動擴充
+    fmt.Println(s[:4])  // "[A B C D]"
+    
+Slice在呼叫func傳遞參數做Slice修改會自動更改到底層數據，反之array則不會
+        
+    // reverse()是反轉字串
+    
+    // Array
+    a := [...]int{0, 1, 2, 3, 4, 5}
+    reverse(a)
+    fmt.Println(a) // "[0 1 2 3 4 5]"
+    
+    // Slice
+    s := []int{0, 1, 2, 3, 4, 5}
+    reverse(s)
+    fmt.Println(s) // "[5 4 3 2 1 0]"
+
+Slice不能互相比較，Array可以互相比較
+
+    a := []string{1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
+    b := []string{1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
+    c := [...]string{}
+    d := [...]string{}
+ 
+    fmt.Println(a == b) // 編譯錯誤
+    fmt.Println(c == d) // true
+    fmt.Println(a == nil) // Slice只能跟nil比較 false
+
+```
+Slice比較只有bytes.Equal可用，不然就只能自己實現，要判斷是否為空最好用len(s) == 0
+```
