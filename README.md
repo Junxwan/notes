@@ -1,5 +1,19 @@
 # Golang 筆記
 
+**[index](#index)**
+* [package name](#package-name)
+* [import](#import)
+* [func](#func-命名採用駝峰式)
+* [變數](#變數)
+* [const](#const)
+* [iota](#iota)
+* [if](#if)
+* [for](#for)
+* [type](#type)
+* [string](#string)
+* [array](#array)
+* [slice](#slice)
+
 ## package name 
 
 正確 應該小寫
@@ -219,7 +233,7 @@ type 開頭大寫與小寫應該分類，大寫放上，小寫放下
 
     type IntegerType int
     
-## String
+## string
     
 盡量不要使用+串接字串
 
@@ -259,7 +273,7 @@ type 開頭大寫與小寫應該分類，大寫放上，小寫放下
         test["Body"] = 2
     }
     
-## Array
+## array
 
 宣告一個長度三，類型為int，初始值都是0
 
@@ -290,7 +304,7 @@ array應用場景在於長度固定不變，如sha256，一般建議用slice
         fmt.Printf("%x\n%x\n%t\n%T\n", c1, c2, c1 == c2, c1)
     }
 
-## Slice
+## slice
 
 一組Slice
 
