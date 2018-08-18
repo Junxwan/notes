@@ -28,6 +28,22 @@
 
     import “github.com/name/project/src/net”  
 
+main package一定是最晚被初始化，這樣可以確認import的package一定比main還早初始化
+    
+    package main
+    
+    import (
+    	"fmt"
+    	"os"
+    	"strconv"
+    	"tempconv"
+    )
+    
+    func main() {
+    	.....
+    }
+
+
 ## func 命名採用駝峰式
     
 可公開在其他package下使用命名開頭大寫
@@ -78,9 +94,28 @@ func 參數 小駝峰式
     	......
     }
     
-專有名詞應全大寫
+專有名詞應全大寫 or 小寫
 
     UrlPathInfo應該寫成URLPathInfo或urlPathInfo
+
+func 開頭大寫與小寫應該分類，大寫放上，小寫放下
+    
+    func Println(a ...interface{}) (n int, err error) {
+    	....
+    }
+    
+    func Sprintln(a ...interface{}) string {
+    	....
+    }
+    
+    func imag(c ComplexType) FloatType {
+        ....
+    }
+    
+    func copy(dst, src []Type) int {
+        ...
+    }
+
     
 ## const
 
@@ -109,6 +144,32 @@ initialization以簡短變量聲明
     for _, value := range array {
         .....
     }
+    
+## type
+    
+開頭name大寫則可讓外部使用
+
+    type Stringer interface {
+    	String() string
+    }
+
+開頭name小寫則不可讓外部使用
+
+    type float32 float32
+
+type 開頭大寫與小寫應該分類，大寫放上，小寫放下
+    
+    type Stringer interface {
+    	String() string
+    }
+    
+    type Formatter interface {
+    	Format(f State, c rune)
+    }
+    
+    type buffer []byte
+
+    type IntegerType int
     
 ## String
     
