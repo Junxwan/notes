@@ -3,7 +3,7 @@
 **[index](#index)**
 * [package name](#package-name)
 * [import](#import)
-* [func](#func-命名採用駝峰式)
+* [func](#func)
 * [變數](#變數)
 * [const](#const)
 * [iota](#iota)
@@ -15,6 +15,7 @@
 * [slice](#slice)
 * [map](#map)
 * [struct](#struct)
+* [json](#json)
 
 ## package name 
 
@@ -60,7 +61,9 @@ main package一定是最晚被初始化，這樣可以確認import的package一�
     }
 
 
-## func 命名採用駝峰式
+## func 
+
+> 命名採用駝峰式
     
 可公開在其他package下使用命名開頭大寫
 
@@ -69,6 +72,80 @@ main package一定是最晚被初始化，這樣可以確認import的package一�
 私有在其他package不可使用命名開頭小寫
 
     fmt.fmtString()
+    
+參數類型定義，兩者一樣意思
+
+    func f(i, j, k int, s, t string)                
+    func f(i int, j int, k int,  s string, t string) 
+    
+多回傳值
+    
+    func findLinksLog(url string) ([]string, error) {
+    	return findLinks(url)
+    }
+    
+    func findLinks(url string) ([]string, error) {
+        return url, nil
+    }
+
+bare return，省略return直接定義return 變數
+
+    func CountWordsAndImages(url string) (words, images int, err error) {
+    	resp, err := http.Get(url)
+    	words, images = countWordsAndImages(resp)
+    	return
+    }
+    
+    // 與上面同等
+    func CountWordsAndImages(url string) (int, int, error) {
+    	resp, err := http.Get(url)
+    	words, images = countWordsAndImages(resp)
+    	return words, images, err
+    }
+
+接收任意數量參數
+
+    func sum(vals...int) int {.....}
+
+以"..."做將Slice內的值做參數傳遞
+
+    values := []int{1, 2, 3, 4}
+    
+    fmt.Println(sum(values...)) 
+
+defer當該func執行結束後才執行，如下不管是第一個還是第二個return後都會執行resp.Body.Close()
+
+    func call(url string) error {
+        resp, err := http.Get(url)
+        if err != nil {
+            return err
+        }
+    
+        defer resp.Body.Close()
+    
+        return nil
+    }
+
+呼叫package function與struct method
+
+    type Point struct {
+        X, Y float64
+    }
+    
+    func Distance(p, q Point) string {
+        return "function"
+    }
+    
+    func (p Point) Distance(q Point) string {
+        return "method"
+    }
+    
+    func main() {
+        p := Point{1, 2}
+        q := Point{4, 6}
+        fmt.Println(Distance(p, q)) // function
+        fmt.Println(p.Distance(q))  // method
+    }
 
 ## 變數
 
@@ -520,12 +597,12 @@ value也可以是字符串集合等
     }
     
     type Circle struct {
-        Point
+        Point           // 省略
         Radius int
     }
     
     type Wheel struct {
-        Circle
+        Circle          // 省略
         Spokes int
     }
     
@@ -536,4 +613,53 @@ value也可以是字符串集合等
         w.Y = 8
         w.Radius = 5
         w.Spokes = 20
+    }
+    
+## json 
+
+一個struct定義某些屬性在轉為成json後key要做更換
+
+    type Movie struct {
+    	Title  string
+    	Year   int  `json:"released"`
+    	Color  bool `json:"color"`
+    	Actors []string
+    }
+    
+    var movies = []Movie{
+    	{Title: "Casablanca", Year: 1942, Color: false,
+    		Actors: []string{"Humphrey Bogart", "Ingrid Bergman"}}
+    }
+    
+    fmt.Printf("%s\n", json.Marshal(movies))
+    
+    {
+        "Title": "Casablanca",
+        "released": 1942,       // Year切換成released
+        "color": false,         // Color切換成color
+        "Actors": [
+            "Humphrey Bogart",
+            "Ingrid Bergman"
+        ]
+    }
+    
+json解碼，轉成struct並只轉換Title屬性
+
+    var titles []struct {
+        Title string
+    }
+    
+    if err := json.Unmarshal(json.Marshal(movies), &titles); err == nil {
+        fmt.Print(titles)
+    }
+    
+json解碼根據tag name取對應json key做value
+    
+    type IssuesSearchResult struct {
+    	TotalCount int `json:"total_count"`
+    	Items      []*Issue
+    }
+    
+    {
+        "total_count": 20 // TotalCount對應到total_count
     }
