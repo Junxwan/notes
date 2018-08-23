@@ -16,6 +16,7 @@
 * [map](#map)
 * [struct](#struct)
 * [json](#json)
+* [interface](#interface)
 
 ## package name 
 
@@ -63,7 +64,7 @@ main package一定是最晚被初始化，這樣可以確認import的package一�
 
 ## func 
 
-> 命名採用駝峰式
+> 命名採用駝峰式，參數是傳值，會複製一個同樣內容的變數當區域變數(底層內存地址不一樣)
     
 可公開在其他package下使用命名開頭大寫
 
@@ -129,22 +130,46 @@ defer當該func執行結束後才執行，如下不管是第一個還是第二�
 呼叫package function與struct method
 
     type Point struct {
-        X, Y float64
+    	X, Y float64
     }
     
-    func Distance(p, q Point) string {
-        return "function"
+    func Distance(p, q Point) float64 {
+    	return p.X * q.X
     }
     
-    func (p Point) Distance(q Point) string {
-        return "method"
+    func (p Point) Distance(q Point) float64 {
+    	return p.Y + q.Y
     }
     
     func main() {
-        p := Point{1, 2}
-        q := Point{4, 6}
-        fmt.Println(Distance(p, q)) // function
-        fmt.Println(p.Distance(q))  // method
+    	p := Point{1, 2}
+    	q := Point{4, 6}
+    	fmt.Println(Distance(p, q)) // "4"
+    	fmt.Println(p.Distance(q))	// "8"
+    }
+    
+>> p.Distance(q)做意思是q由外部注入，但p參數則由呼叫來源端(這邊指p)帶入
+
+透過回傳func當變數並進行呼叫
+   
+    type Point struct {
+    	X, Y float64
+    }
+    
+    type ColoredPoint struct {
+    	Point
+    	Color color.RGBA
+    }
+    
+    func (p Point) Distance(q Point) float64 {
+    	return p.X + q.Y
+    }
+    
+    func main() {
+    	red := color.RGBA{255, 0, 0, 255}
+    	var p = ColoredPoint{Point{1, 1}, red}
+    	distance := p.Distance                  // 原本的func暫存在一個變數
+    	fmt.Print(distance(Point{5, 4}))        // "5"
     }
 
 ## 變數
@@ -209,7 +234,6 @@ func 開頭大寫與小寫應該分類，大寫放上，小寫放下
         ...
     }
 
-    
 ## const
 
 編譯後不可在執行過程中更改
@@ -615,6 +639,36 @@ value也可以是字符串集合等
         w.Spokes = 20
     }
     
+省略屬性類型，可隱式對該類型方法做操作
+    
+    type Point struct{
+    	X, Y float64
+    }
+    
+    type ColoredPoint struct {
+    	Point               // 省略
+    	Color color.RGBA
+    }
+    
+    func (p *Point) ScaleBy(factor float64) {
+    	p.X *= factor
+    	p.Y *= factor
+    }
+    
+    func main() {
+    	red := color.RGBA{255, 0, 0, 255}
+    	p := ColoredPoint{Point{1, 1}, red}
+    	p.ScaleBy(2)            //隱式的將ColoredPoint呼叫到Point類型的ScaleBy method
+    	fmt.Println(p.Point)
+    }
+    
+指針
+
+    type ColoredPoint struct {
+    	*Point
+    	Color color.RGBA
+    }
+    
 ## json 
 
 一個struct定義某些屬性在轉為成json後key要做更換
@@ -662,4 +716,54 @@ json解碼根據tag name取對應json key做value
     
     {
         "total_count": 20 // TotalCount對應到total_count
+    }
+
+## interface
+
+一個method參數對應到一個interface，如下Fprintf()需要滿足io.Writer這個interface
+而該interface需要一個Write(p []byte) (n int, err error)，當ByteCounter內
+可以隱式的呼叫Write時則符合io.Writer即可以作為如下Fprintf()參數
+
+    type ByteCounter int
+    
+    func (c *ByteCounter) Write(p []byte) (int, error) {
+    	*c += ByteCounter(len(p)) // convert int to ByteCounter
+    	return len(p), nil
+    }
+    
+    func main() {
+    	var c ByteCounter
+    	var name = "Dolly"
+    	fmt.Fprintf(&c, "hello, %s", name)
+    }
+    
+    package fmt
+    
+    func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
+    	p := newPrinter()
+    	p.doPrintf(format, a)
+    	n, err = w.Write(p.buf)
+    	p.free()
+    	return
+    }
+    
+    package io
+    
+    type Writer interface {
+    	Write(p []byte) (n int, err error)
+    }
+    
+一個interface可以內遷多個interface
+    
+    type ReadWriter interface {
+    	Reader
+    	Writer
+    }
+    
+    type Reader interface {
+        Read(p []byte) (n int, err error)
+    }
+    
+    type Writer interface {
+        Write(p []byte) (n int, err error)
     }
