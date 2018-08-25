@@ -19,6 +19,7 @@
 * [json](#json)
 * [interface](#interface)
 * [錯誤](#錯誤)
+* [型別判斷](#型別判斷)
 
 ## package name 
 
@@ -53,10 +54,10 @@ main package一定是最晚被初始化，這樣可以確認import的package一�
     package main
     
     import (
-    	"fmt"
-    	"os"
-    	"strconv"
-    	"tempconv"
+        "fmt"
+        "os"
+        "strconv"
+        "tempconv"
     )
     
     func main() {
@@ -84,7 +85,7 @@ main package一定是最晚被初始化，這樣可以確認import的package一�
 多回傳值
     
     func findLinksLog(url string) ([]string, error) {
-    	return findLinks(url)
+        return findLinks(url)
     }
     
     func findLinks(url string) ([]string, error) {
@@ -94,26 +95,26 @@ main package一定是最晚被初始化，這樣可以確認import的package一�
 bare return，省略return直接定義return 變數
 
     func CountWordsAndImages(url string) (words, images int, err error) {
-    	resp, err := http.Get(url)
-    	words, images = countWordsAndImages(resp)
-    	return
+        resp, err := http.Get(url)
+        words, images = countWordsAndImages(resp)
+        return
     }
     
     // 與上面同等
     func CountWordsAndImages(url string) (int, int, error) {
-    	resp, err := http.Get(url)
-    	words, images = countWordsAndImages(resp)
-    	return words, images, err
+        resp, err := http.Get(url)
+        words, images = countWordsAndImages(resp)
+        return words, images, err
     }
 
 接收任意數量參數
 
     func sum(vals ...int) int {
-    	total := 0
-    	for _, val := range vals {
-    		total += val
-    	}
-    	return total
+        total := 0
+        for _, val := range vals {
+            total += val
+        }
+        return total
     }
 
 以"..."做將Slice內的值做參數傳遞
@@ -142,17 +143,17 @@ defer當該func執行結束後才執行，如下不管是第一個還是第二�
 呼叫package function
 
     type Point struct {
-    	X, Y float64
+        X, Y float64
     }
     
     func Distance(p, q Point) float64 {
-    	return p.X * q.X
+        return p.X * q.X
     }
         
     func main() {
-    	p := Point{1, 2}
-    	q := Point{4, 6}
-    	fmt.Println(Distance(p, q)) // "4"
+        p := Point{1, 2}
+        q := Point{4, 6}
+        fmt.Println(Distance(p, q)) // "4"
     }
     
 呼叫struct method    
@@ -176,23 +177,23 @@ defer當該func執行結束後才執行，如下不管是第一個還是第二�
 透過回傳func當變數並進行呼叫
    
     type Point struct {
-    	X, Y float64
+        X, Y float64
     }
     
     type ColoredPoint struct {
-    	Point
-    	Color color.RGBA
+        Point
+        Color color.RGBA
     }
     
     func (p Point) Distance(q Point) float64 {
-    	return p.X + q.Y
+        return p.X + q.Y
     }
     
     func main() {
-    	red := color.RGBA{255, 0, 0, 255}
-    	var p = ColoredPoint{Point{1, 1}, red}
-    	distance := p.Distance                  // 原本的func暫存在一個變數
-    	fmt.Print(distance(Point{5, 4}))        // "5"
+        red := color.RGBA{255, 0, 0, 255}
+        var p = ColoredPoint{Point{1, 1}, red}
+        distance := p.Distance                  // 原本的func暫存在一個變數
+        fmt.Print(distance(Point{5, 4}))        // "5"
     }
 
 ## 變數
@@ -392,7 +393,7 @@ initialization以簡短變量聲明
 開頭name大寫則可讓外部使用
 
     type Stringer interface {
-    	String() string
+        String() string
     }
 
 開頭name小寫則不可讓外部使用
@@ -402,11 +403,11 @@ initialization以簡短變量聲明
 type 開頭大寫與小寫應該分類，大寫放上，小寫放下
     
     type Stringer interface {
-    	String() string
+        String() string
     }
     
     type Formatter interface {
-    	Format(f State, c rune)
+        Format(f State, c rune)
     }
     
     type buffer []byte
@@ -452,6 +453,11 @@ type 開頭大寫與小寫應該分類，大寫放上，小寫放下
         test["Title"] = "1"
         test["Body"] = 2
     }
+    
+查看類型
+
+    fmt.Printf("%T", os.Stdin) // *os.File
+    fmt.Printf("%T", new(io.Writer)) // *io.Writer
     
 ## array
 
@@ -606,8 +612,8 @@ value也可以是字符串集合等
 相臨同樣類型可以並行
 
     type Article struct {
-    	ID                   int
-    	Name, Title, Context string
+        ID                   int
+        Name, Title, Context string
     }
 
 放入相同結構
@@ -628,7 +634,7 @@ value也可以是字符串集合等
 設定結構屬性值，需按照順序與對應類型設定(不要使用可以對外開放的結構)
 
     type Point struct {
-    	X, Y int
+        X, Y int
     }
     
     p := Point{1, 2}
@@ -636,7 +642,7 @@ value也可以是字符串集合等
 設定結構屬性值以Name做設定，不需照順序設定，沒設定則採用默認(0)
 
     type Point struct {
-    	X, Y int
+        X, Y int
     }
         
     p := Point{X: 1, Y: 2}
@@ -653,23 +659,23 @@ value也可以是字符串集合等
 傳遞參數(用指標可以節省內存，因為操作同樣底層不用重新分配內存)
     
     func Scale(p *Point, factor int) *Point {
-    	p.X *= factor
-    	p.Y *= factor
-    	return p
+        p.X *= factor
+        p.Y *= factor
+        return p
     }
 
 屬性與struct比較
 
     type Point struct {
-    	X, Y int
+        X, Y int
     }
     
     func main() {
-    	p := Point{1, 2}
-    	q := Point{1, 1}
-    	fmt.Println(p.X == q.X) // "true"
-    	fmt.Println(p.Y == q.Y) // "false"
-    	fmt.Println(p == q)     // "false"
+        p := Point{1, 2}
+        q := Point{1, 1}
+        fmt.Println(p.X == q.X) // "true"
+        fmt.Println(p.Y == q.Y) // "false"
+        fmt.Println(p == q)     // "false"
     }
     
 屬性指定別的struct
@@ -719,31 +725,31 @@ value也可以是字符串集合等
 省略屬性類型，可隱式對該類型方法做操作
     
     type Point struct{
-    	X, Y float64
+        X, Y float64
     }
     
     type ColoredPoint struct {
-    	Point               // 省略
-    	Color color.RGBA
+        Point               // 省略
+        Color color.RGBA
     }
     
     func (p *Point) ScaleBy(factor float64) {
-    	p.X *= factor
-    	p.Y *= factor
+        p.X *= factor
+        p.Y *= factor
     }
     
     func main() {
-    	red := color.RGBA{255, 0, 0, 255}
-    	p := ColoredPoint{Point{1, 1}, red}
-    	p.ScaleBy(2)            //隱式的將ColoredPoint呼叫到Point類型的ScaleBy method
-    	fmt.Println(p.Point)
+        red := color.RGBA{255, 0, 0, 255}
+        p := ColoredPoint{Point{1, 1}, red}
+        p.ScaleBy(2)            //隱式的將ColoredPoint呼叫到Point類型的ScaleBy method
+        fmt.Println(p.Point)
     }
     
 指針
 
     type ColoredPoint struct {
-    	*Point
-    	Color color.RGBA
+        *Point
+        Color color.RGBA
     }
     
 ## json 
@@ -751,15 +757,15 @@ value也可以是字符串集合等
 一個struct定義某些屬性在轉為成json後key要做更換
 
     type Movie struct {
-    	Title  string
-    	Year   int  `json:"released"`
-    	Color  bool `json:"color"`
-    	Actors []string
+        Title  string
+        Year   int  `json:"released"`
+        Color  bool `json:"color"`
+        Actors []string
     }
     
     var movies = []Movie{
     	{Title: "Casablanca", Year: 1942, Color: false,
-    		Actors: []string{"Humphrey Bogart", "Ingrid Bergman"}}
+            Actors: []string{"Humphrey Bogart", "Ingrid Bergman"}}
     }
     
     fmt.Printf("%s\n", json.Marshal(movies))
@@ -787,8 +793,8 @@ json解碼，轉成struct並只轉換Title屬性
 json解碼根據tag name取對應json key做value
     
     type IssuesSearchResult struct {
-    	TotalCount int `json:"total_count"`
-    	Items      []*Issue
+        TotalCount int `json:"total_count"`
+        Items      []*Issue
     }
     
     {
@@ -804,37 +810,37 @@ json解碼根據tag name取對應json key做value
     type ByteCounter int
     
     func (c *ByteCounter) Write(p []byte) (int, error) {
-    	*c += ByteCounter(len(p)) // convert int to ByteCounter
-    	return len(p), nil
+        *c += ByteCounter(len(p)) // convert int to ByteCounter
+        return len(p), nil
     }
     
     func main() {
-    	var c ByteCounter
-    	var name = "Dolly"
-    	fmt.Fprintf(&c, "hello, %s", name)
+        var c ByteCounter
+        var name = "Dolly"
+        fmt.Fprintf(&c, "hello, %s", name)
     }
     
     package fmt
     
     func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
-    	p := newPrinter()
-    	p.doPrintf(format, a)
-    	n, err = w.Write(p.buf)
-    	p.free()
-    	return
+        p := newPrinter()
+        p.doPrintf(format, a)
+        n, err = w.Write(p.buf)
+        p.free()
+        return
     }
     
     package io
     
     type Writer interface {
-    	Write(p []byte) (n int, err error)
+        Write(p []byte) (n int, err error)
     }
     
 一個interface可以內遷多個interface
     
     type ReadWriter interface {
-    	Reader
-    	Writer
+        Reader
+        Writer
     }
     
     type Reader interface {
@@ -859,32 +865,60 @@ json解碼根據tag name取對應json key做value
 堆疊錯誤訊息再一起印出來
     
     func printStack() {
-    	var buf [4096]byte
-    	n := runtime.Stack(buf[:], false) // runtime寫入錯誤歷程
-    	os.Stdout.Write(buf[:n])
+        var buf [4096]byte
+        n := runtime.Stack(buf[:], false) // runtime寫入錯誤歷程
+        os.Stdout.Write(buf[:n])
     }
         
     func f(x int) {
-    	defer fmt.Printf("defer %d\n", x)
-    	f(x - 1)
+        defer fmt.Printf("defer %d\n", x)
+        f(x - 1)
     }
 
 補抓panic錯誤
     
     func main() {
-    	get()
+        get()
     }
     
     func get() int {
-    	defer func() {
-    		switch p := recover(); p {  // recover()可以取得panic內容
-    		case nil:
-    			fmt.Print(p)
-    		default:
-    			fmt.Print(p)
-    		}
-    	}()
+        defer func() {
+            switch p := recover(); p {  // recover()可以取得panic內容
+            case nil:
+                fmt.Print(p)
+            default:
+                fmt.Print(p)
+            }
+        }()
     
-    	panic(nil)
-    	return 0
+        panic(nil)
+        return 0
+    }
+    
+## 型別判斷
+
+當型別判斷錯誤時會自動painc
+
+    func main() {
+        var w io.Writer
+        w = os.Stdin            // w 會是*os.File且os.Stdin有符合io.Writer interface條件
+        f := w.(*os.File)       // 轉換成功 f = os.Stdin     
+        c := w.(*bytes.Buffer)  // painc 因為*bytes.Buffer不等於*os.File
+    
+        fmt.Printf("%T", f)
+        fmt.Printf("%T", c)
+    }
+    
+當型別判斷錯誤時不跳出painc改用變數接
+
+    func main() {
+        var w io.Writer
+        w = os.Stdin
+        f, e1 := w.(*os.File)
+        c, e2 := w.(*bytes.Buffer)
+    
+        fmt.Printf("%T\n", f)   // *os.File
+        fmt.Printf("%T\n", c)   // *bytes.Buffer
+        fmt.Println(e1)         // true
+        fmt.Println(e2)         // false
     }
