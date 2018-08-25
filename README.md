@@ -5,6 +5,7 @@
 * [import](#import)
 * [func](#func)
 * [變數](#變數)
+* [指標](#指標)
 * [const](#const)
 * [iota](#iota)
 * [if](#if)
@@ -17,6 +18,7 @@
 * [struct](#struct)
 * [json](#json)
 * [interface](#interface)
+* [錯誤](#錯誤)
 
 ## package name 
 
@@ -106,13 +108,23 @@ bare return，省略return直接定義return 變數
 
 接收任意數量參數
 
-    func sum(vals...int) int {.....}
+    func sum(vals ...int) int {
+    	total := 0
+    	for _, val := range vals {
+    		total += val
+    	}
+    	return total
+    }
 
 以"..."做將Slice內的值做參數傳遞
 
     values := []int{1, 2, 3, 4}
     
     fmt.Println(sum(values...)) 
+
+closure當參數
+    
+    func test(a string, c func(s []string)) {....}
 
 defer當該func執行結束後才執行，如下不管是第一個還是第二個return後都會執行resp.Body.Close()
 
@@ -127,7 +139,7 @@ defer當該func執行結束後才執行，如下不管是第一個還是第二�
         return nil
     }
 
-呼叫package function與struct method
+呼叫package function
 
     type Point struct {
     	X, Y float64
@@ -136,18 +148,29 @@ defer當該func執行結束後才執行，如下不管是第一個還是第二�
     func Distance(p, q Point) float64 {
     	return p.X * q.X
     }
-    
-    func (p Point) Distance(q Point) float64 {
-    	return p.Y + q.Y
-    }
-    
+        
     func main() {
     	p := Point{1, 2}
     	q := Point{4, 6}
     	fmt.Println(Distance(p, q)) // "4"
-    	fmt.Println(p.Distance(q))	// "8"
     }
     
+呼叫struct method    
+
+    type Point struct {
+        X, Y float64
+    }
+    
+    func (p Point) Distance(q Point) float64 {
+        return p.Y + q.Y
+    }
+    
+    func main() {
+        p := Point{1, 2}
+        q := Point{4, 6}
+        fmt.Println(p.Distance(q))	// "8"
+    }     
+
 >> p.Distance(q)做意思是q由外部注入，但p參數則由呼叫來源端(這邊指p)帶入
 
 透過回傳func當變數並進行呼叫
@@ -185,8 +208,34 @@ defer當該func執行結束後才執行，如下不管是第一個還是第二�
 全域變數不要使用簡短變量聲明
 
     i := ""
+
+定義某個類型
+
+    var s string
+
+定義預設值
     
-func內變數以簡短變量聲明
+    var s = ""
+    
+定義多個變數
+
+    var a, b, c = true, "string", 1.0
+    
+取得func結果與是否成功
+
+    var f, err = os.Open($name)
+    
+> var 通常用於需要賦予特定值(非各類型預設值)
+
+簡短變量聲明
+
+    i := ""
+    
+多個簡短變量聲明
+
+    i, j := 1, "1"
+
+func內變數大多以簡短變量聲明
 
     func Println() {
         i := ""
@@ -233,6 +282,34 @@ func 開頭大寫與小寫應該分類，大寫放上，小寫放下
     func copy(dst, src []Type) int {
         ...
     }
+
+## 指標
+
+取指標
+
+    var p string
+    fmt.Print(&p)   // ""
+
+取指標的值
+
+    var p  = "1"
+    q := &p
+    fmt.Print(*q)   // 1
+    
+指標比較
+
+    var p  = "1"
+    q := &p
+    fmt.Println(q == &p)    // true
+    fmt.Println(*q == p)    // true
+
+指標值會連動
+
+    var p  = "1"
+    q := &p
+    *q = "2"
+    fmt.Println(*q) // 2
+    fmt.Println(p)  // 2
 
 ## const
 
@@ -766,4 +843,48 @@ json解碼根據tag name取對應json key做value
     
     type Writer interface {
         Write(p []byte) (n int, err error)
+    }
+
+## 錯誤
+
+如果需要自訂一個error message
+
+    doc, err := html.Parse(resp.Body)
+    resp.Body.Close()
+    if err != nil {
+        // fmt.Errorf會返回error type
+        return nil, fmt.Errorf("parsing %s as HTML: %v", url, err) 
+    }
+    
+堆疊錯誤訊息再一起印出來
+    
+    func printStack() {
+    	var buf [4096]byte
+    	n := runtime.Stack(buf[:], false) // runtime寫入錯誤歷程
+    	os.Stdout.Write(buf[:n])
+    }
+        
+    func f(x int) {
+    	defer fmt.Printf("defer %d\n", x)
+    	f(x - 1)
+    }
+
+補抓panic錯誤
+    
+    func main() {
+    	get()
+    }
+    
+    func get() int {
+    	defer func() {
+    		switch p := recover(); p {  // recover()可以取得panic內容
+    		case nil:
+    			fmt.Print(p)
+    		default:
+    			fmt.Print(p)
+    		}
+    	}()
+    
+    	panic(nil)
+    	return 0
     }
