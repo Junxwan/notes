@@ -20,6 +20,9 @@
 * [interface](#interface)
 * [錯誤](#錯誤)
 * [型別判斷](#型別判斷)
+* [goroutine](#goroutine)
+* [channel](#channel)
+* [select](#select)
 
 ## package name 
 
@@ -921,4 +924,136 @@ json解碼根據tag name取對應json key做value
         fmt.Printf("%T\n", c)   // *bytes.Buffer
         fmt.Println(e1)         // true
         fmt.Println(e2)         // false
+    }
+    
+## goroutine
+
+使用go關鍵字處理多個人連線並顯示系統時間
+
+>> nc localhost 8000 可以連線並顯示系統時間
+
+    func main() {
+        // 監聽localhost:8000
+        listener, err := net.Listen("tcp", "localhost:8000")
+        if err != nil {
+            log.Fatal(err)
+        }
+    
+        for {
+            // 一直循環檢查是否有人連線至localhost:8000
+            // 如果都沒有就停留在Accept()不往下走
+            // 這邊用無限迴圈主因是要一直監聽有沒有人連線過來
+            conn, err := listener.Accept()
+            if err != nil {
+                log.Print(err)
+                continue
+            }
+            // 執行顯示時間
+            // 這邊用go是因為當出現兩個以上的連線時要另外開一個process做處理
+            // 不然都是單線程會阻塞第二個連線的Client
+            go handleConn(conn)
+        }
+    }
+    
+    func handleConn(c net.Conn) {
+        defer c.Close()
+        for {
+            // 一直處於連線並回應Client端現在的時間
+            // 如果不使用for則func執行完後會c.Close()中斷連線
+            _, err := io.WriteString(c, time.Now().Format("15:04:05\n"))
+            if err != nil {
+                return
+            }
+            // 停留1秒
+            time.Sleep(1 * time.Second)
+        }
+    }
+
+## channel
+    
+> 請不要在同一個goroutine內做接收與發送channel，因為發送端會一直阻塞
+    
+建立無緩衝，發送端goroutine發送值直到接收端goroutine接收前，發送端goroutine都會等待接收端goroutine接收值
+後發送端goroutine才會繼續執行，這可以讓接收端與發送端goroutine同步化
+    
+    naturals := make(chan int)
+    squares := make(chan int)
+   
+> 三個廚師，A廚師做飯，B廚師做湯，C廚師擺盤，A廚師每次做完一個就往下丟給下一個廚師
+如果中間某個廚師動作慢就會造成等待   
+   
+建立有緩衝，這channel保存三個值，如channel已滿則會停止執行發送端goroutine直到接收端goroutine接收channel
+空出空間才會在繼續執行發送端goroutine，如果channel非空也非滿則接收與發送端goroutine都會繼續執行
+
+    naturals := make(chan int, 3)
+    squares := make(chan int, 3)
+
+> 三個廚師，A廚師做飯，B廚師做湯，C廚師擺盤，A廚師每次做完三個再一次往下丟給下一個廚師
+比較不會因為某廚師動作慢而造成阻塞，因為有緩衝 
+
+取得channel最大緩衝值
+
+    fmt.Print(cap(make(chan int, 3)))
+    
+取得channel目前緩衝數
+       
+   fmt.Print(len(make(chan int, 3)))
+       
+傳送
+
+    naturals <- 1
+    
+接收
+    
+    x := <-squares
+    
+關閉
+    
+    close(squares)    
+    
+> 不可關閉已關閉的channel
+
+以func傳遞
+
+    func squarer(out chan<- int, in <-chan int) {
+        for v := range in {
+            out <- v * v
+        }
+    }
+    
+## select
+
+看誰case最快完成就執行該case邏輯
+
+    func main() {
+        abort := make(chan struct{})
+        go func() {
+            os.Stdin.Read(make([]byte, 1)) // read a single byte
+            abort <- struct{}{}
+        }()
+    
+        select {
+        case <-time.After(10 * time.Second):    // 10s後沒動作
+            // Do nothing.
+        case <-abort:
+            fmt.Println("Launch aborted!")      // 有輸入任何字元
+            return
+        }
+    
+        fmt.Println("Lift off!")
+    }
+    
+判斷輸出與接收
+
+    func main() {
+        ch := make(chan int, 1)
+        for i := 0; i < 10; i++ {
+            fmt.Printf("當前i:%d\n", i)
+            select {
+            case x := <-ch: 
+                fmt.Printf("輸出:%d\n", x)        // 輸出 0 2 4 6 8
+            case ch <- i:
+                fmt.Printf("輸入:%d 長度:%d\n", i, len(ch))
+            }
+        }
     }
