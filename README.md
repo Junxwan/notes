@@ -25,10 +25,13 @@
 - [Golang delve](#golang-delve)
     - [執行debug](#%E5%9F%B7%E8%A1%8Cdebug)
     - [設定中斷點](#%E8%A8%AD%E5%AE%9A%E4%B8%AD%E6%96%B7%E9%BB%9E)
-    - [跳到下一個中斷點](#%08%E8%B7%B3%E5%88%B0%E4%B8%8B%E4%B8%80%E5%80%8B%E4%B8%AD%E6%96%B7%E9%BB%9E)
+    - [刪除中斷點](#%E5%88%AA%E9%99%A4%E4%B8%AD%E6%96%B7%E9%BB%9E)
+    - [顯示所有中斷點](#%E9%A1%AF%E7%A4%BA%E6%89%80%E6%9C%89%E4%B8%AD%E6%96%B7%E9%BB%9E)
+    - [跳到下一個中斷點](#%E8%B7%B3%E5%88%B0%E4%B8%8B%E4%B8%80%E5%80%8B%E4%B8%AD%E6%96%B7%E9%BB%9E)
     - [跳下一行](#%E8%B7%B3%E4%B8%8B%E4%B8%80%E8%A1%8C)
     - [列印變數](#%08%E5%88%97%E5%8D%B0%E8%AE%8A%E6%95%B8)
     - [顯示現在所在](#%E9%A1%AF%E7%A4%BA%E7%8F%BE%E5%9C%A8%E6%89%80%E5%9C%A8)
+    - [退出debug](#%E9%80%80%E5%87%BAdebug)
 
 ## package name
 
@@ -1075,24 +1078,37 @@ json解碼根據tag name取對應json key做value
     Type 'help' for list of commands.
     (dlv) {這邊打指令做操作}
 
-
 ## 設定中斷點
 
 中斷main.go的30行
 
     $ b main.go:30
 
-> b是break的別名
+> b是break的縮寫
 
-## 跳到下一個中斷點
+## 刪除中斷點
 
-    $ continue
+刪除第二個中斷點
+
+    $ clear 2
+
+## 顯示所有中斷點
+
+    $ bp
+
+> bp是breakpoints的縮寫
+
+## 跳到下一個中斷點
+
+    $ c
+
+> c是continue的縮寫
 
 ## 跳下一行
 
     $ n
 
-> n是next的別名
+> n是next的縮寫
 
 ## 列印變數
 
@@ -1100,10 +1116,14 @@ json解碼根據tag name取對應json key做value
 
     $ p var
 
-> p是print的別名，現在不支援執行func()
+> p是print的縮寫，現在不支援執行func()
 
 ## 顯示現在所在
 
     $ ls
 
-> ls是list的別名
+> ls是list的縮寫
+
+## 退出debug
+
+    $ exit
