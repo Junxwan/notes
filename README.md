@@ -1,30 +1,36 @@
 # Golang 筆記
+- [Golang 筆記](#golang-%E7%AD%86%E8%A8%98)
+    - [package name](#package-name)
+    - [import](#import)
+    - [func](#func)
+    - [變數](#%E8%AE%8A%E6%95%B8)
+    - [指標](#%E6%8C%87%E6%A8%99)
+    - [const](#const)
+    - [iota](#iota)
+    - [if](#if)
+    - [for](#for)
+    - [type](#type)
+    - [string](#string)
+    - [array](#array)
+    - [slice](#slice)
+    - [map](#map)
+    - [struct](#struct)
+    - [json](#json)
+    - [interface](#interface)
+    - [錯誤](#%E9%8C%AF%E8%AA%A4)
+    - [型別判斷](#%E5%9E%8B%E5%88%A5%E5%88%A4%E6%96%B7)
+    - [goroutine](#goroutine)
+    - [channel](#channel)
+    - [select](#select)
+- [Golang delve](#golang-delve)
+    - [執行debug](#%E5%9F%B7%E8%A1%8Cdebug)
+    - [設定中斷點](#%E8%A8%AD%E5%AE%9A%E4%B8%AD%E6%96%B7%E9%BB%9E)
+    - [跳到下一個中斷點](#%08%E8%B7%B3%E5%88%B0%E4%B8%8B%E4%B8%80%E5%80%8B%E4%B8%AD%E6%96%B7%E9%BB%9E)
+    - [跳下一行](#%E8%B7%B3%E4%B8%8B%E4%B8%80%E8%A1%8C)
+    - [列印變數](#%08%E5%88%97%E5%8D%B0%E8%AE%8A%E6%95%B8)
+    - [顯示現在所在](#%E9%A1%AF%E7%A4%BA%E7%8F%BE%E5%9C%A8%E6%89%80%E5%9C%A8)
 
-**[index](#index)**
-* [package name](#package-name)
-* [import](#import)
-* [func](#func)
-* [變數](#變數)
-* [指標](#指標)
-* [const](#const)
-* [iota](#iota)
-* [if](#if)
-* [for](#for)
-* [type](#type)
-* [string](#string)
-* [array](#array)
-* [slice](#slice)
-* [map](#map)
-* [struct](#struct)
-* [json](#json)
-* [interface](#interface)
-* [錯誤](#錯誤)
-* [型別判斷](#型別判斷)
-* [goroutine](#goroutine)
-* [channel](#channel)
-* [select](#select)
-
-## package name 
+## package name
 
 正確 應該小寫
 
@@ -811,20 +817,20 @@ json解碼根據tag name取對應json key做value
 可以隱式的呼叫Write時則符合io.Writer即可以作為如下Fprintf()參數
 
     type ByteCounter int
-    
+
     func (c *ByteCounter) Write(p []byte) (int, error) {
         *c += ByteCounter(len(p)) // convert int to ByteCounter
         return len(p), nil
     }
-    
+
     func main() {
         var c ByteCounter
         var name = "Dolly"
         fmt.Fprintf(&c, "hello, %s", name)
     }
-    
+
     package fmt
-    
+
     func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error) {
         p := newPrinter()
         p.doPrintf(format, a)
@@ -832,24 +838,24 @@ json解碼根據tag name取對應json key做value
         p.free()
         return
     }
-    
+
     package io
-    
+
     type Writer interface {
         Write(p []byte) (n int, err error)
     }
-    
+
 一個interface可以內遷多個interface
-    
+
     type ReadWriter interface {
         Reader
         Writer
     }
-    
+
     type Reader interface {
         Read(p []byte) (n int, err error)
     }
-    
+
     type Writer interface {
         Write(p []byte) (n int, err error)
     }
@@ -864,26 +870,26 @@ json解碼根據tag name取對應json key做value
         // fmt.Errorf會返回error type
         return nil, fmt.Errorf("parsing %s as HTML: %v", url, err) 
     }
-    
+
 堆疊錯誤訊息再一起印出來
-    
+
     func printStack() {
         var buf [4096]byte
         n := runtime.Stack(buf[:], false) // runtime寫入錯誤歷程
         os.Stdout.Write(buf[:n])
     }
-        
+
     func f(x int) {
         defer fmt.Printf("defer %d\n", x)
         f(x - 1)
     }
 
 補抓panic錯誤
-    
+
     func main() {
         get()
     }
-    
+
     func get() int {
         defer func() {
             switch p := recover(); p {  // recover()可以取得panic內容
@@ -893,7 +899,7 @@ json解碼根據tag name取對應json key做value
                 fmt.Print(p)
             }
         }()
-    
+
         panic(nil)
         return 0
     }
@@ -905,13 +911,13 @@ json解碼根據tag name取對應json key做value
     func main() {
         var w io.Writer
         w = os.Stdin            // w 會是*os.File且os.Stdin有符合io.Writer interface條件
-        f := w.(*os.File)       // 轉換成功 f = os.Stdin     
+        f := w.(*os.File)       // 轉換成功 f = os.Stdin
         c := w.(*bytes.Buffer)  // painc 因為*bytes.Buffer不等於*os.File
-    
+
         fmt.Printf("%T", f)
         fmt.Printf("%T", c)
     }
-    
+
 當型別判斷錯誤時不跳出painc改用變數接
 
     func main() {
@@ -919,13 +925,13 @@ json解碼根據tag name取對應json key做value
         w = os.Stdin
         f, e1 := w.(*os.File)
         c, e2 := w.(*bytes.Buffer)
-    
+
         fmt.Printf("%T\n", f)   // *os.File
         fmt.Printf("%T\n", c)   // *bytes.Buffer
         fmt.Println(e1)         // true
         fmt.Println(e2)         // false
     }
-    
+
 ## goroutine
 
 使用go關鍵字處理多個人連線並顯示系統時間
@@ -938,7 +944,7 @@ json解碼根據tag name取對應json key做value
         if err != nil {
             log.Fatal(err)
         }
-    
+
         for {
             // 一直循環檢查是否有人連線至localhost:8000
             // 如果都沒有就停留在Accept()不往下走
@@ -954,7 +960,7 @@ json解碼根據tag name取對應json key做value
             go handleConn(conn)
         }
     }
-    
+
     func handleConn(c net.Conn) {
         defer c.Close()
         for {
@@ -970,18 +976,18 @@ json解碼根據tag name取對應json key做value
     }
 
 ## channel
-    
+
 > 請不要在同一個goroutine內做接收與發送channel，因為發送端會一直阻塞
-    
+
 建立無緩衝，發送端goroutine發送值直到接收端goroutine接收前，發送端goroutine都會等待接收端goroutine接收值
 後發送端goroutine才會繼續執行，這可以讓接收端與發送端goroutine同步化
-    
+
     naturals := make(chan int)
     squares := make(chan int)
-   
+
 > 三個廚師，A廚師做飯，B廚師做湯，C廚師擺盤，A廚師每次做完一個就往下丟給下一個廚師
-如果中間某個廚師動作慢就會造成等待   
-   
+如果中間某個廚師動作慢就會造成等待 
+
 建立有緩衝，這channel保存三個值，如channel已滿則會停止執行發送端goroutine直到接收端goroutine接收channel
 空出空間才會在繼續執行發送端goroutine，如果channel非空也非滿則接收與發送端goroutine都會繼續執行
 
@@ -994,23 +1000,23 @@ json解碼根據tag name取對應json key做value
 取得channel最大緩衝值
 
     fmt.Print(cap(make(chan int, 3)))
-    
+
 取得channel目前緩衝數
-       
+
    fmt.Print(len(make(chan int, 3)))
-       
+
 傳送
 
     naturals <- 1
-    
+
 接收
-    
+
     x := <-squares
-    
+
 關閉
-    
-    close(squares)    
-    
+
+    close(squares)
+
 > 不可關閉已關閉的channel
 
 以func傳遞
@@ -1020,7 +1026,7 @@ json解碼根據tag name取對應json key做value
             out <- v * v
         }
     }
-    
+
 ## select
 
 看誰case最快完成就執行該case邏輯
@@ -1031,7 +1037,7 @@ json解碼根據tag name取對應json key做value
             os.Stdin.Read(make([]byte, 1)) // read a single byte
             abort <- struct{}{}
         }()
-    
+
         select {
         case <-time.After(10 * time.Second):    // 10s後沒動作
             // Do nothing.
@@ -1039,10 +1045,10 @@ json解碼根據tag name取對應json key做value
             fmt.Println("Launch aborted!")      // 有輸入任何字元
             return
         }
-    
+
         fmt.Println("Lift off!")
     }
-    
+
 判斷輸出與接收
 
     func main() {
@@ -1057,3 +1063,47 @@ json解碼根據tag name取對應json key做value
             }
         }
     }
+
+# Golang delve
+
+## 執行debug
+
+    $ dlv main.so
+
+進入後會呈現
+
+    Type 'help' for list of commands.
+    (dlv) {這邊打指令做操作}
+
+
+## 設定中斷點
+
+中斷main.go的30行
+
+    $ b main.go:30
+
+> b是break的別名
+
+## 跳到下一個中斷點
+
+    $ continue
+
+## 跳下一行
+
+    $ n
+
+> n是next的別名
+
+## 列印變數
+
+列印var變數
+
+    $ p var
+
+> p是print的別名，現在不支援執行func()
+
+## 顯示現在所在
+
+    $ ls
+
+> ls是list的別名
