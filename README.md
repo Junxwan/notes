@@ -31,6 +31,9 @@
     - [跳下一行](#%E8%B7%B3%E4%B8%8B%E4%B8%80%E8%A1%8C)
     - [列印變數](#%E5%88%97%E5%8D%B0%E8%AE%8A%E6%95%B8)
     - [顯示現在所在](#%E9%A1%AF%E7%A4%BA%E7%8F%BE%E5%9C%A8%E6%89%80%E5%9C%A8)
+    - [顯示當前goroutine堆疊](#%E9%A1%AF%E7%A4%BA%E7%95%B6%E5%89%8Dgoroutine%E5%A0%86%E7%96%8A)
+    - [顯示所有goroutine](#%E9%A1%AF%E7%A4%BA%E6%89%80%E6%9C%89goroutine)
+    - [查看當前goroutine堆疊各個呼叫入口](#%E6%9F%A5%E7%9C%8B%E7%95%B6%E5%89%8Dgoroutine%E5%A0%86%E7%96%8A%E5%90%84%E5%80%8B%E5%91%BC%E5%8F%AB%E5%85%A5%E5%8F%A3)
     - [退出debug](#%E9%80%80%E5%87%BAdebug)
 
 ## package name
@@ -1123,6 +1126,63 @@ json解碼根據tag name取對應json key做value
     $ ls
 
 > ls是list的縮寫
+
+## 顯示當前goroutine堆疊
+
+    $ stack
+
+## 顯示所有goroutine
+    
+    $ goroutines
+
+    $ goroutines -t // 追加顯示各個goroutine堆疊
+
+        Goroutine 1 - User: ./main/main.go:52 main.DBGTestRun (0x10b2458) (thread 2560573)
+        0  0x00000000010b2458 in main.run
+            at ./main/main.go:52
+        1  0x00000000010b20c4 in main.main
+            at ./main/main.go:25
+        2  0x000000000102c220 in runtime.main
+            at /usr/local/go/src/runtime/proc.go:198
+        3  0x0000000001054881 in runtime.goexit
+            at /usr/local/go/src/runtime/asm_amd64.s:2361
+
+
+## 查看當前goroutine堆疊各個呼叫入口
+
+先查看當前goroutine堆疊，可以看出現在執行到第四層(由上到下)
+    
+    $ stack
+
+    0  0x00000000010b2458 in main.run
+    at ./main/main.go:52
+    1  0x00000000010b20c4 in main.main
+    at ./main/main.go:25
+    2  0x000000000102c220 in runtime.main
+    at /usr/local/go/src/runtime/proc.go:198
+    3  0x0000000001054881 in runtime.goexit
+    at /usr/local/go/src/runtime/asm_amd64.s:2361
+
+看第一層堆疊執行在哪裡
+
+    $ frame 0 ls
+
+        > main.run() ./main/main.go:25 (hits goroutine(1):1 total:1) (PC: 0x10b2458)
+        47:         go run1()
+        48: 
+    =>  50:         go run2()
+        51: 
+        52:         fmt.Println("test")
+
+看第二層堆疊執行在哪裡
+
+    $ frame 1 ls
+
+    > Goroutine 1 frame 1 at /private/var/www/golang/src/main/main.go:50 (PC: 0x10b20c4)
+        23:         t1 := 1
+        24:         t2 := 2
+    =>  25:         fmt.Println(t1)
+        26:         fmt.Println(t2)
 
 ## 退出debug
 
