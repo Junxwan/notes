@@ -29,7 +29,7 @@
     - [顯示所有中斷點](#%E9%A1%AF%E7%A4%BA%E6%89%80%E6%9C%89%E4%B8%AD%E6%96%B7%E9%BB%9E)
     - [跳到下一個中斷點](#%E8%B7%B3%E5%88%B0%E4%B8%8B%E4%B8%80%E5%80%8B%E4%B8%AD%E6%96%B7%E9%BB%9E)
     - [跳下一行](#%E8%B7%B3%E4%B8%8B%E4%B8%80%E8%A1%8C)
-    - [列印變數](#%08%E5%88%97%E5%8D%B0%E8%AE%8A%E6%95%B8)
+    - [列印變數](#%E5%88%97%E5%8D%B0%E8%AE%8A%E6%95%B8)
     - [顯示現在所在](#%E9%A1%AF%E7%A4%BA%E7%8F%BE%E5%9C%A8%E6%89%80%E5%9C%A8)
     - [退出debug](#%E9%80%80%E5%87%BAdebug)
 
@@ -1071,7 +1071,7 @@ json解碼根據tag name取對應json key做value
 
 ## 執行debug
 
-    $ dlv main.so
+    $ dlv debug main.so
 
 進入後會呈現
 
@@ -1110,7 +1110,7 @@ json解碼根據tag name取對應json key做value
 
 > n是next的縮寫
 
-## 列印變數
+## 列印變數
 
 列印var變數
 
