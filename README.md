@@ -1163,20 +1163,20 @@ json解碼根據tag name取對應json key做value
     3  0x0000000001054881 in runtime.goexit
     at /usr/local/go/src/runtime/asm_amd64.s:2361
 
-看第一層堆疊執行在哪裡
+看第一層堆疊執行在哪裡
 
-    $ frame 0 ls
+    $ frame 0 ls
 
-        > main.run() ./main/main.go:25 (hits goroutine(1):1 total:1) (PC: 0x10b2458)
+    > main.run() ./main/main.go:25 (hits goroutine(1):1 total:1) (PC: 0x10b2458)
         47:         go run1()
         48: 
     =>  50:         go run2()
         51: 
         52:         fmt.Println("test")
 
-看第二層堆疊執行在哪裡
+看第二層堆疊執行在哪裡
 
-    $ frame 1 ls
+    $ frame 1 ls
 
     > Goroutine 1 frame 1 at /private/var/www/golang/src/main/main.go:50 (PC: 0x10b20c4)
         23:         t1 := 1
@@ -1186,4 +1186,4 @@ json解碼根據tag name取對應json key做value
 
 ## 退出debug
 
-    $ exit
+    $ exit 
