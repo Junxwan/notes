@@ -32,7 +32,7 @@
     - [進到func](#%E9%80%B2%E5%88%B0func)
     - [跳下一行](#%E8%B7%B3%E4%B8%8B%E4%B8%80%E8%A1%8C)
     - [列印變數](#%E5%88%97%E5%8D%B0%E8%AE%8A%E6%95%B8)
-    - [修改變數值](#%08%08%E4%BF%AE%E6%94%B9%E8%AE%8A%E6%95%B8%E5%80%BC)
+    - [修改變數值](#%E4%BF%AE%E6%94%B9%E8%AE%8A%E6%95%B8%E5%80%BC)
     - [顯示現在所在](#%E9%A1%AF%E7%A4%BA%E7%8F%BE%E5%9C%A8%E6%89%80%E5%9C%A8)
     - [顯示當前goroutine堆疊](#%E9%A1%AF%E7%A4%BA%E7%95%B6%E5%89%8Dgoroutine%E5%A0%86%E7%96%8A)
     - [顯示所有goroutine](#%E9%A1%AF%E7%A4%BA%E6%89%80%E6%9C%89goroutine)
@@ -1144,7 +1144,7 @@ See [Documentation](https://github.com/derekparker/delve/blob/master/Documentati
 
 > p是print的縮寫，現在不支援執行func()
 
-## 修改變數值
+## 修改變數值
 
 $ set var = 10
 
