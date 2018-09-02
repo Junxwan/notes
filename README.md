@@ -21,6 +21,7 @@
     - [型別判斷](#%E5%9E%8B%E5%88%A5%E5%88%A4%E6%96%B7)
     - [goroutine](#goroutine)
     - [channel](#channel)
+        - [close](#close)
     - [select](#select)
 - [Golang delve](#golang-delve)
     - [執行debug](#%E5%9F%B7%E8%A1%8Cdebug)
@@ -1024,17 +1025,73 @@ json解碼根據tag name取對應json key做value
 
     x := <-squares
 
-關閉
-
-    close(squares)
-
-> 不可關閉已關閉的channel
-
 以func傳遞
 
     func squarer(out chan<- int, in <-chan int) {
         for v := range in {
             out <- v * v
+        }
+    }
+
+### close
+> 記住一個原則，不要從接收端close channel，因為如果沒有通知發送端則會造成panic
+
+    package main
+
+    import (
+        "fmt"
+        "sync"
+    )
+
+    var job chan int
+    var w sync.WaitGroup
+
+    func worker(job <- chan int)  {
+        defer w.Done()
+        for job := range job{
+            fmt.Printf("數字%d\n", job)
+        }
+    }
+
+    func main() {
+        job = make(chan int, 20)
+
+        for i := 1; i <= 10; i++{
+            job <- i
+        }
+
+        w.Add(1)
+        close(job)
+
+        go worker(job)
+        w.Wait()
+    }
+
+> 不可關閉已關閉的channel
+
+建立一個具有20個int緩衝的channel
+
+    job = make(chan int, 20)
+
+在執行worker前先向channel發送10個int
+
+    for i := 1; i <= 10; i++ {
+        job <- i
+    }
+
+然後關閉channel，代表著不可以在向channel做發送的動作只可以做接收
+
+    close(job)
+
+然後執行worker做讀取channel
+
+    go worker(job)
+
+當channel讀取完10個int後就會跳出for，然後就結束main，但如果沒有事先執行close，則會造成channel阻塞一直停在for
+
+    func worker(job <-chan int) {
+        for j := range job {
+            fmt.Printf("數字%d\n", job)
         }
     }
 
