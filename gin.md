@@ -1,18 +1,20 @@
 # Gin Web Framework
 
-- [Api](#Api)
+- [API](#API)
     - [GET, POST, PUT, PATCH, DELETE and OPTIONS](#get-post-put-patch-delete-and-options)
     - [Route 匹配規則](#Route-匹配規則)
-    - [GET PathInfo 參數](#GET-PathInfo-參數)
-    - [GET Query String](#GET-Query-String)
+    - [PathInfo 參數](#PathInfo-參數)
+    - [Query String](#Query-String)
+    - [Form body](#Form-body)
     - [Run Http Server](#Run-Http-Server)
     - [Response body](#Response-body)
 - [範例](#範例)
     - [基礎](#基礎)
     - [路徑當參數](#路徑當參數)
     - [Query String](#Query-String)
+    - [Form](#Form)
 
-## Api
+## API
 
 ### GET, POST, PUT, PATCH, DELETE and OPTIONS
 
@@ -50,7 +52,7 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
     /user/test                      匹配
     /user/test/index.go             匹配
 
-### GET PathInfo 參數
+### PathInfo 參數
 
 `c.Param("name")`可以取得名為路徑上定義的name
 
@@ -62,14 +64,14 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
     // $ curl http://localhost:8080/user/world 
     // Hello world
 
-### GET Query String
+### Query String
 
 `c.DefaultQuery`取Query String但可以設定默認值
 
 * 第一個參數為Query String
 * 第二個參數為默認值
 
-`c.Query`取Query String默認值為空值
+`c.Query`取Query String，默認值為空值
 
 * 第一個參數為Query String
 
@@ -82,12 +84,31 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
         c.String(http.StatusOK, "firstname:%s\nlastname:%s", firstname, lastname)
     })
 
+### Form-body
+
+`c.DefaultPostForm`取Form參數名但可以設定默認值
+
+* 第一個參數為Form參數名
+* 第二個參數為默認值
+
+`c.PostForm`取Form參數名，默認值為空值
+
+    router.POST("/form_post", func(c *gin.Context) {
+        message := c.PostForm("message")
+        name := c.DefaultPostForm("name", "test")
+
+        c.JSON(200, gin.H{
+            "message": message,
+            "name":    name,
+        })
+    })
+
 ### Response body
 
 `c.JSON`輸出json格式且Content-Type: `application/json`
 
-1. 第一個參數為Http code 
-2. 第二個參數為`interface{}`
+* 第一個參數為Http code 
+* 第二個參數為`interface{}`
 
 範例
 
@@ -106,8 +127,8 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
 `c.String`輸出string格式且Content-Type: `text/plain`
 
-1. 第一個參數為Http code 
-2. 第二個參數為`interface{}`
+* 第一個參數為Http code 
+* 第二個參數為`interface{}`
 
 範例
 
@@ -215,3 +236,26 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
     // $ curl http://localhost:8080/welcome?lastname=test
     // firstname:Guest
     // lastname:test
+
+### Form
+
+設定一個`/form_post`路徑，監聽`127.0.0.1:8080`並回傳`message`與`name`參數值
+
+    func main() {
+        router := gin.Default()
+
+        router.POST("/form_post", func(c *gin.Context) {
+            message := c.PostForm("message")
+            name := c.DefaultPostForm("name", "test")
+
+            c.JSON(200, gin.H{
+                "message": message,
+                "name":    name,
+            })
+        })
+
+        router.Run()
+    }
+
+    // $ curl -d "message=Hello" -H "Content-Type: application/x-www-form-urlencoded" -X POST http://localhost:8080/form_post
+    // {"message":"Hello","name":"test"}
