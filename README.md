@@ -1079,10 +1079,11 @@ json解碼根據tag name取對應json key做value
         job <- i
     }
 
-然後關閉channel，代表著不可以在向channel做發送的動作只可以做接收
+然後關閉channel，代表著不可以在向channel做發送的動作只可以做接收
+
     close(job)
 
-然後執行worker做讀取channel
+然後執行worker做讀取channel
 
     go worker(job)
 
