@@ -1079,15 +1079,14 @@ json解碼根據tag name取對應json key做value
         job <- i
     }
 
-然後關閉channel，代表著不可以在向channel做發送的動作只可以做接收
-
+然後關閉channel，代表著不可以在向channel做發送的動作只可以做接收
     close(job)
 
-然後執行worker做讀取channel
+然後執行worker做讀取channel
 
     go worker(job)
 
-當channel讀取完10個int後就會跳出for，然後就結束main，但如果沒有事先執行close，則會造成channel阻塞一直停在for
+當channel讀取完10個int後就會跳出for，然後就結束main，但如果沒有事先執行close，則會造成channel阻塞一直停在for
 
     func worker(job <-chan int) {
         for j := range job {
