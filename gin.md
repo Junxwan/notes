@@ -4,9 +4,13 @@
     - [GET, POST, PUT, PATCH, DELETE and OPTIONS](#get-post-put-patch-delete-and-options)
     - [Route 匹配規則](#Route-匹配規則)
     - [GET PathInfo 參數](#GET-PathInfo-參數)
+    - [GET Query String](#GET-Query-String)
+    - [Run Http Server](#Run-Http-Server)
+    - [Response body](#Response-body)
 - [範例](#範例)
     - [基礎](#基礎)
     - [路徑當參數](#路徑當參數)
+    - [Query String](#Query-String)
 
 ## Api
 
@@ -58,6 +62,82 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
     // $ curl http://localhost:8080/user/world 
     // Hello world
 
+### GET Query String
+
+`c.DefaultQuery`取Query String但可以設定默認值
+
+* 第一個參數為Query String
+* 第二個參數為默認值
+
+`c.Query`取Query String默認值為空值
+
+* 第一個參數為Query String
+
+範例
+
+    router.GET("/test", func(c *gin.Context) {
+        firstname := c.DefaultQuery("firstname", "Guest")
+        lastname := c.Query("lastname")
+
+        c.String(http.StatusOK, "firstname:%s\nlastname:%s", firstname, lastname)
+    })
+
+### Response body
+
+`c.JSON`輸出json格式且Content-Type: `application/json`
+
+1. 第一個參數為Http code 
+2. 第二個參數為`interface{}`
+
+範例
+
+    func main() {
+    
+        router := gin.Default()
+
+        router.GET("/", func(c *gin.Context) {
+            c.JSON(200, gin.H{
+                "message": "pong",
+            })
+        })
+
+        router.Run() 
+    }
+
+`c.String`輸出string格式且Content-Type: `text/plain`
+
+1. 第一個參數為Http code 
+2. 第二個參數為`interface{}`
+
+範例
+
+    func main() {
+        router := gin.Default()
+
+        router.GET("/", func(c *gin.Context) {
+            c.String(http.StatusOK, "Hello World")
+        })
+
+        router.Run()
+    }
+
+### Run Http Server
+
+默認監聽8080 port
+
+    func main() {
+        router := gin.Default()
+        router.Run()
+    }
+
+監聽9000 port
+
+    func main() {
+        router := gin.Default()
+        router.Run(":9000")
+    }
+
+
 ## 範例
 
 ### 基礎
@@ -65,13 +145,15 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 設定一個`/ping`路徑，監聽`127.0.0.1:8080`並回傳json，
 
     func main() {
-        r := gin.Default()
-        r.GET("/ping", func(c *gin.Context) {
+        router := gin.Default()
+
+        router.GET("/ping", func(c *gin.Context) {
             c.JSON(200, gin.H{
                 "message": "pong",
             })
         })
-        r.Run() 
+
+        router.Run() 
     }
 
     // $ curl http://localhost:8080/ping     
@@ -79,7 +161,7 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
 ### 路徑當參數
 
-設定一個`/user/:name`路徑，這代表第二個path為必填且可以自由定義當參數，監聽`127.0.0.1:8080`並回傳json，
+設定一個`/user/:name`路徑，監聽`127.0.0.1:8080`並回傳`Hello` + `name`參數值
 
     func main() {
         router := gin.Default()
@@ -94,3 +176,42 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
     // $ curl http://localhost:8080/user/world 
     // Hello world
+
+設定一個`/user/:name/*action`路徑，監聽`127.0.0.1:8080`並回傳`name`與`action`參數值
+
+    func main() {
+        router := gin.Default()
+
+        router.GET("/user/:name/*action", func(c *gin.Context) {
+            name := c.Param("name")
+            action := c.Param("action")
+            c.String(http.StatusOK, "name:%s\naction:%s\n", name, action)
+        })
+
+        router.Run()
+    }
+
+    // $ curl http://localhost:8080/user/test/path/index.go
+    // name:test
+    // action:/path/index.go
+
+### Query String
+
+設定一個`/test`路徑，監聽`127.0.0.1:8080`並回傳`firstname`與`lastname`參數值
+
+    func main() {
+        router := gin.Default()
+
+        router.GET("/test", func(c *gin.Context) {
+            firstname := c.DefaultQuery("firstname", "Guest")
+            lastname := c.Query("lastname")
+
+            c.String(http.StatusOK, "firstname:%s\nlastname:%s", firstname, lastname)
+        })
+        
+        router.Run()
+    }
+
+    // $ curl http://localhost:8080/welcome?lastname=test
+    // firstname:Guest
+    // lastname:test
