@@ -1069,7 +1069,7 @@ json解碼根據tag name取對應json key做value
 
 > 不可關閉已關閉的channel
 
-建立一個具有20個int緩衝的channel
+建立一個具有20個int緩衝的channel
 
     job = make(chan int, 20)
 
