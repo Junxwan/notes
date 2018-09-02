@@ -16,6 +16,10 @@
     - [map](#map)
     - [struct](#struct)
     - [json](#json)
+        - [陣列](#陣列)
+        - [物件](#物件)
+        - [多層](#多層)
+        - [多層別名](#多層別名)
     - [interface](#interface)
     - [錯誤](#%E9%8C%AF%E8%AA%A4)
     - [型別判斷](#%E5%9E%8B%E5%88%A5%E5%88%A4%E6%96%B7)
@@ -821,6 +825,56 @@ json解碼根據tag name取對應json key做value
     {
         "total_count": 20 // TotalCount對應到total_count
     }
+
+### 陣列
+
+    array := []string{"one", "two", "three"}
+	array, _ := json.Marshal(array)
+	fmt.Println(string(array))
+
+    // ["one","two","three"]
+
+### 物件
+
+    object := map[string]int{"one": 5, "two": 7}
+    object, _ := json.Marshal(object)
+    fmt.Println(string(object))
+
+    // {"one":5,"two":7}
+
+### 多層
+
+    type response1 struct {
+        Page   int
+        Fruits []string
+    }
+
+    res1D := &response1{
+        Page:   1,
+        Fruits: []string{"apple", "peach", "pear"}
+    }
+
+    res1B, _ := json.Marshal(res1D)
+    fmt.Println(string(res1B))
+
+    // {"Page":1,"Fruits":["apple","peach","pear"]}
+
+### 多層別名
+
+    type response2 struct {
+        Page   int      `json:"page"`
+        Fruits []string `json:"fruits"`
+    }
+
+    res2D := &response2{
+		Page:   1,
+		Fruits: []string{"apple", "peach", "pear"}
+    }
+
+	res2B, _ := json.Marshal(res2D)
+	fmt.Println(string(res2B))
+
+    // {"page":1,"fruits":["apple","peach","pear"]}
 
 ## interface
 
