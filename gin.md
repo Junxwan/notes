@@ -8,6 +8,7 @@ See [Documentation](https://github.com/gin-gonic/gin)
     - [PathInfo 參數](#pathInfo-參數)
     - [Query String](#query-String)
     - [Form body](#form-body)
+    - [Router Static](#router-Static)
     - [Run Http Server](#run-Http-Server)
     - [Response body](#response-body)
 - [範例](#範例)
@@ -15,6 +16,7 @@ See [Documentation](https://github.com/gin-gonic/gin)
     - [路徑當參數](#路徑當參數)
     - [Query String](#query-String)
     - [Form](#form)
+    - [靜態目錄route](#靜態目錄route)
 
 ## API
 
@@ -31,6 +33,7 @@ See [Documentation](https://github.com/gin-gonic/gin)
 	router.PATCH("/pathinfo", func())
 	router.HEAD("/pathinfo", func())
 	router.OPTIONS("/pathinfo", func())
+    router.Any("/pathinfo", func())
 
 ### Route 匹配規則
 
@@ -50,7 +53,7 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
     Pattern: /user/:name/*action
 
-    /user/                          匹配
+    /user/                          不匹配
     /user/test                      匹配
     /user/test/index.go             匹配
 
@@ -104,6 +107,36 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
             "name":    name,
         })
     })
+
+### Router Static
+
+`router.Static`可以依照route訪問目錄
+
+* 第一個參數為route
+* 第二個參數為目錄路徑
+
+`router.StaticFile`可以依照route訪問檔案
+
+* 第一個參數為route
+* 第二個參數為檔案路徑
+
+範例
+
+    func main() {
+        router := gin.Default()
+
+        router.Static("/dir", "./public")                     // 200
+        router.Static("/dirFile", "./public/file.html")       // 404
+
+        router.StaticFile("/file", "./public")
+        router.StaticFile("/fileDir", "./public/file.html")
+
+        router.Run()
+    }
+
+兩者差異
+
+`router.Static`預設是抓目錄底下的index.html
 
 ### Response body
 
@@ -261,3 +294,27 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
     // $ curl -d "message=Hello" -H "Content-Type: application/x-www-form-urlencoded" -X POST http://localhost:8080/form_post
     // {"message":"Hello","name":"test"}
+
+### 靜態目錄route
+
+設定一個`/`路徑，指向`public`目錄，默認會找該目錄的index.html，監聽`127.0.0.1:8080`
+
+    func main() {
+        router := gin.Default()
+        
+        router.Static("/", "./public")
+
+        router.Run()
+    }
+
+### 靜態檔案route
+
+設定一個`/`路徑，指向`public/info.html`目錄，監聽`127.0.0.1:8080`
+
+    func main() {
+        router := gin.Default()
+        
+        router.Static("/", "./public/info.html")
+
+        router.Run()
+    }
