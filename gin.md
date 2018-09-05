@@ -5,12 +5,27 @@ See [Documentation](https://github.com/gin-gonic/gin)
 - [API](#API)
     - [GET, POST, PUT, PATCH, DELETE and OPTIONS](#get-post-put-patch-delete-and-options)
     - [Route 匹配規則](#route-匹配規則)
+        - [/user/:name](#/user/:name)
+        - [/user/:name/*action](#/user/:name/*action)
     - [PathInfo 參數](#pathinfo-參數)
+        - [c.Param()](#c.param())
     - [Query String](#query)
+        - [c.DefaultQuery](#c.defaultquery)
+        - [c.Query](#c.query)
     - [Form body](#form-body)
+        - [c.DefaultPostForm](#c.defaultpostForm)
+        - [c.PostForm](#c.postForm)
     - [Form file](#form-file)
+        - [c.FormFile](#c.formFile)
+        - [router.MaxMultipartMemory](#router.maxmultipartmemory)
+        - [c.SaveUploadedFile](#c.saveuploadedfile)
+        - [c.MultipartForm](#c.multipartform)
     - [Router Static](#router-static)
+        - [router.Static](#router.static)
+        - [router.StaticFile](#router.staticfile)
     - [Run Http Server](#run-http-server)
+        - [c.JSON](#c.json)
+        - [c.String](#c.string)
     - [Response body](#response-body)
     
 - [範例](#範例)
@@ -24,6 +39,9 @@ See [Documentation](https://github.com/gin-gonic/gin)
     - [上傳多個檔案](#上傳多個檔案)
     - [Route Group](#route-group)
     - [Route Middleware](#route-middleware)
+        - [gin.Default()](#gin.default())
+        - [gin.New()](#gin.new())
+    - [Logger](#logger)
 
 ## API
 
@@ -42,9 +60,13 @@ See [Documentation](https://github.com/gin-gonic/gin)
 	router.OPTIONS("/pathinfo", func())
     router.Any("/pathinfo", func())
 
+> router `func()` 可以接很多個並且根據順序做執行
+
 ### Route 匹配規則
 
-`/user/:name`是一個較嚴僅的規則如果在`:name`後面又接了其他path info則不匹配
+#### /user/:name
+
+嚴僅的規則如果在`:name`後面又接了其他path info則不匹配
 
 See [Documentation](https://github.com/julienschmidt/httprouter#named-parameters)
 
@@ -54,7 +76,9 @@ See [Documentation](https://github.com/julienschmidt/httprouter#named-parameters
     /user/test                匹配
     /user/test/index.go       不匹配
 
-`/user/:name/*action`是一個較鬆散的規則如果在`:name`後面又接了其他path info同樣匹配
+#### /user/:name/*action
+
+鬆散的規則如果在`:name`後面又接了其他path info同樣匹配
 
 See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parameters)
 
@@ -66,18 +90,24 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
 ### PathInfo 參數
 
+#### c.Param()
+
 `c.Param("name")`可以取得名為路徑上定義的name
 
 [範例](#路徑當參數)
 
 ### Query
 
-`c.DefaultQuery`取Query String但可以設定默認值
+#### c.DefaultQuery
+
+取Query String但可以設定默認值
 
 * 第一個參數為Query String
 * 第二個參數為默認值
 
-`c.Query`取Query String，默認值為空值
+#### c.Query
+
+取Query String，默認值為空值
 
 * 第一個參數為Query String
 
@@ -85,27 +115,39 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
 ### Form body
 
-`c.DefaultPostForm`取Form參數名但可以設定默認值
+#### c.DefaultPostForm
+
+取Form參數名但可以設定默認值
 
 * 第一個參數為Form參數名
 * 第二個參數為默認值
 
-`c.PostForm`取Form參數名，默認值為空值
+#### c.PostForm
+
+取Form參數名，默認值為空值
 
 [範例](#form)
 
 ### Form file
 
+#### c.FormFile
+
 `c.FormFile("image")`可以從Form拿到名為image的file
 
-`router.MaxMultipartMemory`限制上傳檔案的容量(默認 32MiB)
+#### router.MaxMultipartMemory
 
-`c.SaveUploadedFile` 上傳檔案
+限制上傳檔案的容量(默認 32MiB)
+
+#### c.SaveUploadedFile
+
+上傳檔案
 
 * 第一個參數為上傳的檔案資料
 * 第二個參數為上傳檔案名路徑 ex: /var/www/name.png
 
-`c.MultipartForm`取表單內全部的資料
+#### c.MultipartForm
+
+取表單內全部的資料
 
 `form.File["upload[]"]`從`c.MultipartForm`選出File類型且名稱為`upload[]`
 
@@ -115,12 +157,16 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
 ### Router Static
 
-`router.Static`可以依照route訪問目錄
+#### router.Static
+
+可以依照route訪問目錄
 
 * 第一個參數為route
 * 第二個參數為目錄路徑
 
-`router.StaticFile`可以依照route訪問檔案
+#### router.StaticFile
+
+可以依照route訪問檔案
 
 * 第一個參數為route
 * 第二個參數為檔案路徑
@@ -152,7 +198,9 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
 ### Response body
 
-`c.JSON`輸出json格式且Content-Type: `application/json`
+#### c.JSON
+
+輸出json格式且Content-Type: `application/json`
 
 * 第一個參數為Http code 
 * 第二個參數為`interface{}`
@@ -172,7 +220,9 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
         router.Run() 
     }
 
-`c.String`輸出string格式且Content-Type: `text/plain`
+#### c.String
+
+輸出string格式且Content-Type: `text/plain`
 
 * 第一個參數為Http code 
 * 第二個參數為`interface{}`
@@ -402,7 +452,33 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
 每個Route可以設定執行該Route前所要做的動作
 
+#### gin.Default()
+
 `router := gin.Default()` 該route內建了`Logger()`  `Recovery()`兩個
 Middleware分別是紀錄route log與遇到panic的log
 
+#### gin.New()
+
 `router := gin.New()`該route沒有內建任何Middleware
+
+對route新增全域Middleware
+
+    func main() {
+        router := gin.New()
+
+        router.Use(gin.Logger(), gin.Recovery())
+        
+        router.Run()
+    }
+
+對特定route新增Middleware
+
+    func main() {
+        router := gin.New()
+
+        router.GET("/log", gin.Logger())
+
+        router.Run()
+    }
+
+### Logger

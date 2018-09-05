@@ -1,8 +1,8 @@
 # Golang Example
 
 - [http](#http)
-    - [StripPrefix](#stripPrefix)
-    - [FileServer](#fileServer)
+    - [StripPrefix](#stripprefix)
+    - [FileServer](#fileserver)
 
 ## http
 
