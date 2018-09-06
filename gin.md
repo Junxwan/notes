@@ -4,10 +4,10 @@ See [Documentation](https://github.com/gin-gonic/gin)
 
 - [API](#API)
     - [GET, POST, PUT, PATCH, DELETE and OPTIONS](#get-post-put-patch-delete-and-options)
-    - [Route 匹配規則](#route-匹配規則)
+    - [Route Matching Rule](#route-matching-rule)
         - [/user/:name](#/username)
         - [/user/:name/*action](#usernameaction)
-    - [PathInfo 參數](#pathinfo-參數)
+    - [PathInfo Parameter](#pathinfo-參數)
         - [c.Param()](#cparam)
     - [Query String](#query)
         - [c.DefaultQuery](#cdefaultquery)
@@ -24,10 +24,17 @@ See [Documentation](https://github.com/gin-gonic/gin)
         - [router.Static](#routerstatic)
         - [router.StaticFile](#routerstaticfile)
     - [Run Http Server](#run-http-server)
+    - [Response body](#response-body)
         - [c.JSON](#cjson)
         - [c.String](#cstring)
-    - [Response body](#response-body)
-    
+    - [Validator](#validator)
+        - [c.Bind](#cbind)
+        - [c.BindJSON](#cbindjson)
+        - [c.BindQuery](#cbindquery)
+        - [c.ShouldBind](#cshouldbind)
+        - [c.ShouldBindJSON](#cshouldbindjson)
+        - [c.ShouldBindQuery](#cshouldbindquery)
+
 - [範例](#範例)
     - [基礎](#基礎)
     - [路徑當參數](#路徑當參數)
@@ -42,6 +49,13 @@ See [Documentation](https://github.com/gin-gonic/gin)
         - [gin.Default()](#gindefault)
         - [gin.New()](#ginnew)
     - [Logger](#logger)
+    - [驗證](#驗證)
+        - [Bind](#bind)
+        - [BindJSON](#bindjson)
+        - [BindQuery](#bindquery)
+        - [ShouldBind](#shouldbind)
+        - [ShouldBindJSON](#shouldbindjson)
+        - [ShouldBindQuery](#shouldbindquery)
 
 ## API
 
@@ -62,7 +76,7 @@ See [Documentation](https://github.com/gin-gonic/gin)
 
 > router `func()` 可以接很多個並且根據順序做執行
 
-### Route 匹配規則
+### Route Matching Rule
 
 #### /user/:name
 
@@ -88,7 +102,7 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
     /user/test                      匹配
     /user/test/index.go             匹配
 
-### PathInfo 參數
+### PathInfo Parameter
 
 #### c.Param()
 
@@ -238,6 +252,14 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
         router.Run()
     }
+
+### Validator
+
+[See Documentation](https://godoc.org/gopkg.in/go-playground/validator.v9)
+
+#### c.ShouldBindJSON
+
+#### c.ShouldBind
 
 ## 範例
 
@@ -482,3 +504,190 @@ Middleware分別是紀錄route log與遇到panic的log
     }
 
 ### Logger
+
+當訪問`http://localhost:8080/`會將訪問紀錄在log file內
+
+透過`io.MultiWriter(f)`來將file轉成`io.write` 
+
+並覆蓋gin默認`io.write`的對象
+
+由於`gin.Default()`內有Logger Middleware且又是用到`gin.DefaultWriter`來當寫入對象
+
+因此`c.String`會將Log寫入file
+ 
+    func main() {
+        f, _ := os.Create("gin.log")
+        gin.DefaultWriter = io.MultiWriter(f)
+
+        router := gin.Default()
+
+        router.GET("/", func(c *gin.Context) {
+            c.String(200, "pong")
+        })
+
+        router.Run()
+    }
+
+### 驗證 
+
+驗證request內的資料
+
+#### Bind
+
+[see](#cbind)
+
+#### BindJSON
+
+[see](#cbindjson)
+
+#### BindQuery 
+
+[see](#cbindquery)
+
+#### ShouldBind
+
+[see](#cshouldbind)
+
+利用`c.ShouldBind`綁定一個form規則，如果請求的form不符合該規則就error
+   
+如果`user` or `password`有一個不對就認證失敗
+
+都成功就回200
+
+    type Login struct {
+        User     string `form:"user" binding:"required"`
+        Password string `form:"password" binding:"required"`
+    }
+
+    func main() {
+        router := gin.Default()
+
+        router.POST("/loginForm", func(c *gin.Context) {
+            var form Login
+
+            if err := c.ShouldBind(&form); err == nil {
+                if form.User == "manu" && form.Password == "123" {
+                    c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
+                } else {
+                    c.JSON(http.StatusUnauthorized, gin.H{"status": "unauthorized"})
+                }
+            } else {
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            }
+        })
+
+        router.Run()
+    }
+
+Bad request
+
+    curl -v -X POST \
+    http://localhost:8080/loginForm \
+    -F 'user=manu'
+
+    > {"error":"Key: 'Login.Password' Error:Field validation for 'Password' failed on the 'required' tag"}
+
+Success request
+
+    curl -v -X POST \
+    http://localhost:8080/loginForm \
+    -F 'user=manu' -F 'password=123'
+
+    > {"status":"you are logged in"}
+
+#### ShouldBindJSON 
+
+[see](#csouldbindjson)
+
+利用`c.ShouldBindJSON`綁定一個json規則，如果請求的json不符合該規則就error
+   
+如果`user` or `password`有一個不對就認證失敗
+
+都成功就回200
+
+    type Login struct {
+        User     string `json:"user" binding:"required"`
+        Password string `json:"password" binding:"required"`
+    }
+
+    func main() {
+        router := gin.Default()
+
+        router.POST("/loginJSON", func(c *gin.Context) {
+            var json Login
+            if err := c.ShouldBindJSON(&json); err == nil {
+                if json.User == "manu" && json.Password == "123" {
+                    c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
+                } else {
+                    c.JSON(http.StatusUnauthorized, gin.H{"status": "unauthorized"})
+                }
+            } else {
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            }
+        })
+
+        router.Run()
+    }
+
+Bad request
+
+    curl -v -X POST \
+    http://localhost:8080/loginJSON \
+    -H 'content-type: application/json' \
+    -d '{ "user": "manu" }'
+
+    > {"error":"Key: 'Login.Password' Error:Field validation for 'Password' failed on the 'required' tag"}
+
+Success request
+
+    curl -v -X POST \
+    http://localhost:8080/loginJSON \
+    -H 'content-type: application/json' \
+    -d '{ "user": "manu", "password": "123" }'
+
+    > {"status":"you are logged in"}
+
+#### ShouldBindQuery
+
+[see](#cshouldbindquery)
+
+利用`c.ShouldBindQuery`綁定一個query規則，規則是`name`為必填，
+如果請求的query string不符合該規則就回傳`Bad`反之`Success`
+   
+    type Person struct {
+        Name    string `form:"name" binding:"required"`
+        Address string `form:"address"`
+    }
+
+    func main() {
+        route := gin.Default()
+
+        route.Any("/query", func(c *gin.Context) {
+            var person Person
+
+            if c.ShouldBindQuery(&person) == nil {
+                c.String(http.StatusOK, "Success")
+            } else {
+                c.String(http.StatusBadRequest, "Bad")
+            }
+        })
+
+        route.Run()
+    }
+
+Success request
+
+    curl -X GET "localhost:8080/query?name=test&address=tw" 
+    > Success
+
+
+    curl -X POST "localhost:8085/query?name=test&address=tw" -H "Content-Type:application/x-www-form-urlencoded"
+    > Success
+
+Bad request
+
+    curl -X GET "localhost:8080/query?address=xyz"
+    > Bad
+
+    curl -X POST "localhost:8085/query?address=tw" -H "Content-Type:application/x-www-form-urlencoded"
+    > Bad

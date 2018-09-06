@@ -3,6 +3,8 @@
 - [http](#http)
     - [StripPrefix](#stripprefix)
     - [FileServer](#fileserver)
+- [os](#os)
+    - [Create](#create)
 
 ## http
 
@@ -49,4 +51,17 @@
         if err != nil {
             log.Fatal("ListenAndServe: ", err)
         }
+    }
+
+## os
+
+### Create
+
+建立一個`message.log`並寫入`hello world`
+
+    func main() {
+        fd, _ := os.Create("message.log")
+        buf := []byte("hello world")
+        fd.Write(buf)
+        fd.Close()
     }
