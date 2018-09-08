@@ -28,6 +28,7 @@ See [Documentation](https://github.com/gin-gonic/gin)
         - [c.JSON](#cjson)
         - [c.String](#cstring)
     - [Validator](#validator)
+        - [required](#required)
         - [c.Bind](#cbind)
         - [c.BindJSON](#cbindjson)
         - [c.BindQuery](#cbindquery)
@@ -50,12 +51,9 @@ See [Documentation](https://github.com/gin-gonic/gin)
         - [gin.New()](#ginnew)
     - [Logger](#logger)
     - [驗證](#驗證)
-        - [Bind](#bind)
-        - [BindJSON](#bindjson)
-        - [BindQuery](#bindquery)
-        - [ShouldBind](#shouldbind)
-        - [ShouldBindJSON](#shouldbindjson)
-        - [ShouldBindQuery](#shouldbindquery)
+        - [From](#form-validator)
+        - [Json](#json-validator)
+        - [Query](#query-validator)
 
 ## API
 
@@ -257,9 +255,26 @@ See [Documentation](https://github.com/julienschmidt/httprouter#catch-all-parame
 
 [See Documentation](https://godoc.org/gopkg.in/go-playground/validator.v9)
 
-#### c.ShouldBindJSON
+#### required
 
+欄位必填
+
+    type Field struct {
+        Field     string `form:"name" binding:"required"`
+    }
+
+
+
+
+
+
+
+#### c.Bind
+#### c.BindJSON
+#### c.BindQuery
 #### c.ShouldBind
+#### c.ShouldBindJSON
+#### c.ShouldBindQuery
 
 ## 範例
 
@@ -532,27 +547,18 @@ Middleware分別是紀錄route log與遇到panic的log
 
 驗證request內的資料
 
-#### Bind
 
-[see](#cbind)
+#### Form Validator
 
-#### BindJSON
-
-[see](#cbindjson)
-
-#### BindQuery 
-
-[see](#cbindquery)
-
-#### ShouldBind
-
-[see](#cshouldbind)
-
-利用`c.ShouldBind`綁定一個form規則，如果請求的form不符合該規則就error
+綁定一個form規則，如果請求的form不符合該規則就error
    
-如果`user` or `password`有一個不對就認證失敗
+要求`user`跟`password`必填
 
-都成功就回200
+如果`user` or `password`有一個不對就認證失敗，成功就回200
+
+Bind 規則錯誤會回  `400 Content-Type: text/plain; charset=utf-8`
+
+ShouldBind 規則錯誤會回 `Content-Type: application/json; charset=utf-8`
 
     type Login struct {
         User     string `form:"user" binding:"required"`
@@ -565,7 +571,8 @@ Middleware分別是紀錄route log與遇到panic的log
         router.POST("/loginForm", func(c *gin.Context) {
             var form Login
 
-            if err := c.ShouldBind(&form); err == nil {
+            // if err := c.ShouldBind(&form); err == nil {
+            if err := c.Bind(&form); err == nil {
                 if form.User == "manu" && form.Password == "123" {
                     c.JSON(http.StatusOK, gin.H{"status": "you are logged in"})
                 } else {
@@ -579,7 +586,7 @@ Middleware分別是紀錄route log與遇到panic的log
         router.Run()
     }
 
-Bad request
+Bad request 
 
     curl -v -X POST \
     http://localhost:8080/loginForm \
@@ -595,15 +602,17 @@ Success request
 
     > {"status":"you are logged in"}
 
-#### ShouldBindJSON 
+#### Json Validator
 
-[see](#csouldbindjson)
-
-利用`c.ShouldBindJSON`綁定一個json規則，如果請求的json不符合該規則就error
+綁定一個json規則，如果請求的json不符合該規則就error
    
-如果`user` or `password`有一個不對就認證失敗
+要求`user`跟`password`必填
 
-都成功就回200
+如果`user` or `password`有一個不對就認證失敗，成功就回200
+
+BindJSON 規則錯誤會回  `400 Content-Type: text/plain; charset=utf-8`
+
+ShouldBindJSON 規則錯誤會回 `Content-Type: application/json; charset=utf-8`
 
     type Login struct {
         User     string `json:"user" binding:"required"`
@@ -629,7 +638,7 @@ Success request
         router.Run()
     }
 
-Bad request
+Bad request 
 
     curl -v -X POST \
     http://localhost:8080/loginJSON \
@@ -647,13 +656,16 @@ Success request
 
     > {"status":"you are logged in"}
 
-#### ShouldBindQuery
+#### Query Validator
 
-[see](#cshouldbindquery)
-
-利用`c.ShouldBindQuery`綁定一個query規則，規則是`name`為必填，
-如果請求的query string不符合該規則就回傳`Bad`反之`Success`
+綁定一個Query String規則，如果請求的Query String不符合該規則就error
    
+要求`name`必填
+
+BindQuery 規則錯誤會回  `400 Content-Type: text/plain; charset=utf-8`
+
+ShouldBindQuery 規則錯誤會回 `Content-Type: application/json; charset=utf-8`
+
     type Person struct {
         Name    string `form:"name" binding:"required"`
         Address string `form:"address"`
@@ -664,8 +676,8 @@ Success request
 
         route.Any("/query", func(c *gin.Context) {
             var person Person
-
-            if c.ShouldBindQuery(&person) == nil {
+            // if c.ShouldBindQuery(&person) == nil {
+            if c.BindQuery(&person) == nil {
                 c.String(http.StatusOK, "Success")
             } else {
                 c.String(http.StatusBadRequest, "Bad")
@@ -675,6 +687,14 @@ Success request
         route.Run()
     }
 
+Bad request 
+
+    curl -X GET "localhost:8080/query?address=xyz"
+    > Bad
+
+    curl -X POST "localhost:8085/query?address=tw" -H "Content-Type:application/x-www-form-urlencoded"
+    > Bad
+
 Success request
 
     curl -X GET "localhost:8080/query?name=test&address=tw" 
@@ -683,11 +703,3 @@ Success request
 
     curl -X POST "localhost:8085/query?name=test&address=tw" -H "Content-Type:application/x-www-form-urlencoded"
     > Success
-
-Bad request
-
-    curl -X GET "localhost:8080/query?address=xyz"
-    > Bad
-
-    curl -X POST "localhost:8085/query?address=tw" -H "Content-Type:application/x-www-form-urlencoded"
-    > Bad
