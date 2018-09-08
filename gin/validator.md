@@ -101,6 +101,110 @@ name欄位長度必須小於等於10
         Name string `form:"name" binding:"lte=10"`
     }
 
+## unique
+
+name欄位是arrays & slices則不可以有重覆的值
+
+    type Test struct {
+        Name []string `validate:"unique"`
+    }
+
+    var validate *validator.Validate
+
+    func main() {
+        validate = validator.New()
+
+        err := validate.Struct(&Test{
+            Name: []string{"1", "2"},
+        })
+
+        if (err == nil) {
+            fmt.Println(true)
+        } else {
+            fmt.Println(false)
+        }
+    }
+
+## alpha
+
+name欄位值只能是英文
+
+    type Test struct {
+	    Name string `form:"name" binding:"alpha"`
+    }
+
+## alphanum
+
+name欄位值可包含英文跟數字
+
+    type Test struct {
+	    Name string `form:"name" binding:"alphanum"`
+    }
+
+## numeric
+
+name欄位值只能是數字
+
+    type Test struct {
+	    Name string `form:"name" binding:"numeric"`
+    }
+
+## email
+
+name欄位值只能是email格式
+
+    type Test struct {
+	    Name string `form:"name" binding:"email"`
+    }
+
+## url
+
+name欄位值只能是url格式
+
+    type Test struct {
+	    Name string `form:"name" binding:"url"`
+    }
+
+## uri
+
+name欄位值只能是uri格式
+
+    type Test struct {
+	    Name string `form:"name" binding:"uri"`
+    }
+
+## contains
+
+name欄位值內需包含`test`
+
+    type Test struct {
+	    Name string `form:"name" binding:"contains=test"`
+    }
+
+## containsany
+
+name欄位值內需包含`！@＃？`任一字
+
+    type Test struct {
+        Name string `form:"name" binding:"containsany=！@＃？"`
+    }
+
+## excludes
+
+name欄位值內不能包含`test`
+
+    type Test struct {
+	    Name string `form:"name" binding:"excludes=test"`
+    }
+
+## excludesall
+
+name欄位值內不能包含`！@＃？`任一字
+
+    type Test struct {
+        Name string `form:"name" binding:"excludesall=！@＃？"`
+    }
+
 ## c.Bind
 
 綁定一個form規則，如果請求的form不符合該規則就
