@@ -406,3 +406,75 @@ Success request
 
     curl -X POST "localhost:8085/query?name=test&address=tw" -H "Content-Type:application/x-www-form-urlencoded"
     > Success
+
+## Custom Validator
+
+新增一個GET規則，`name`欄位值只能是`test`
+
+    type Booking struct {
+        Name string `form:"name" binding:"test"`
+    }
+
+    func test(
+        v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value,
+        field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string,
+    ) bool {
+        return field.String() == "test"
+    }
+
+    func main() {
+        route := gin.Default()
+
+        if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+            v.RegisterValidation("test", test)
+        }
+
+        route.GET("/", func(c *gin.Context) {
+            var b Booking
+            if err := c.ShouldBindQuery(&b); err == nil {
+                c.JSON(http.StatusOK, true)
+            } else {
+                c.JSON(http.StatusBadRequest, false)
+            }
+        })
+
+        route.Run()
+    }
+
+## Checkbox
+
+一個colors欄位的Checkbox，選擇何種color就顯示該種類名稱，無選擇就error `http code 400`
+
+    type myForm struct {
+        Colors []string `form:"colors[]" binding:"required"`
+    }
+
+    func main() {
+        route := gin.Default()
+
+        route.StaticFile("/", "./public/index.html")
+        route.POST("/", func(c *gin.Context) {
+            var fakeForm myForm
+
+            if err := c.Bind(&fakeForm); err == nil {
+                c.JSON(200, gin.H{"color": fakeForm.Colors})
+            } else {
+                c.JSON(200, "")
+            }
+        })
+
+        route.Run()
+    }
+
+html (./public/index.html)
+
+    <form action="/" method="POST">
+    <p>Check some colors</p>
+    <label for="red">Red</label>
+    <input type="checkbox" name="colors[]" value="red" id="red" />
+    <label for="green">Green</label>
+    <input type="checkbox" name="colors[]" value="green" id="green" />
+    <label for="blue">Blue</label>
+    <input type="checkbox" name="colors[]" value="blue" id="blue" />
+    <input type="submit" />
+    </form>

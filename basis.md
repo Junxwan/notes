@@ -813,7 +813,7 @@ json解碼根據tag name取對應json key做value
 	array, _ := json.Marshal(array)
 	fmt.Println(string(array))
 
-    // ["one","two","three"]
+    // ["one","two","three"]
 
 ### 物件
 

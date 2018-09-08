@@ -41,7 +41,7 @@ See [Documentation](https://github.com/derekparker/delve/blob/master/Documentati
 
 刪除第二個中斷點
 
-    $ clear 2
+    $ clear 2
 
 ## 刪除所有中斷點
 
@@ -118,10 +118,10 @@ $ set var = 10
     
     $ goroutines
 
-    $ goroutines -t // 追加顯示各個goroutine堆疊
+    $ goroutines -t // 追加顯示各個goroutine堆疊
 
         Goroutine 1 - User: ./main/main.go:52 main.DBGTestRun (0x10b2458) (thread 2560573)
-        0  0x00000000010b2458 in main.run
+        0  0x00000000010b2458 in main.run
             at ./main/main.go:52
         1  0x00000000010b20c4 in main.main
             at ./main/main.go:25
@@ -181,3 +181,9 @@ $ set var = 10
 ## 退出debug
 
     $ exit 
+    
+## 如何正確印出變數值
+
+build時候加上`-gcflags "-N -l"`參數在做debug即可
+
+    go build -gcflags "-N -l" main.go
