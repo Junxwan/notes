@@ -6,4 +6,4 @@
     - [value method & pointer method](value_pointer_method.md)
     - [deadlock](deadlock.md)
     - [data races](race.md)
-    - [concurrency and parallelism](gomaxprocs.md)
+    - [concurrency and parallelism](concurrency_parallelism.md)
