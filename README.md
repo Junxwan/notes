@@ -5,3 +5,5 @@
     - [Gin Web Framework](gin/README.md)
     - [value method & pointer method](value_pointer_method.md)
     - [deadlock](deadlock.md)
+    - [data races](race.md)
+    - [concurrency and parallelism](gomaxprocs.md)
