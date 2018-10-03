@@ -4,3 +4,4 @@
     - [debug](delve.md)
     - [Gin Web Framework](gin/README.md)
     - [value method & pointer method](value_pointer_method.md)
+    - [deadlock](deadlock.md)
